@@ -1,0 +1,647 @@
+{% extends "base.html" %}
+
+{% block title %}وضع المعلم - مترجم لغة الإشارة العربية{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1 class="display-5">وضع المعلم</h1>
+            <p class="lead">أدوات متقدمة للمعلمين لتدريس لغة الإشارة العربية</p>
+        </div>
+    </div>
+
+    <!-- Teacher Dashboard -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center h-100 bg-primary text-white">
+                <div class="card-body">
+                    <i class="fas fa-users fa-3x mb-3"></i>
+                    <h5 class="card-title">إدارة الطلاب</h5>
+                    <p class="card-text">متابعة تقدم الطلاب والتقييمات</p>
+                    <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#studentsModal">
+                        عرض الطلاب
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center h-100 bg-success text-white">
+                <div class="card-body">
+                    <i class="fas fa-chalkboard-teacher fa-3x mb-3"></i>
+                    <h5 class="card-title">خطط الدروس</h5>
+                    <p class="card-text">إنشاء وإدارة خطط الدروس</p>
+                    <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#lessonsModal">
+                        إدارة الدروس
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center h-100 bg-info text-white">
+                <div class="card-body">
+                    <i class="fas fa-chart-line fa-3x mb-3"></i>
+                    <h5 class="card-title">التقارير</h5>
+                    <p class="card-text">تقارير مفصلة عن الأداء والتقدم</p>
+                    <button class="btn btn-light" onclick="generateReport()">
+                        إنشاء تقرير
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center h-100 bg-warning text-white">
+                <div class="card-body">
+                    <i class="fas fa-cogs fa-3x mb-3"></i>
+                    <h5 class="card-title">الإعدادات</h5>
+                    <p class="card-text">إعدادات الفصل والتدريس</p>
+                    <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                        الإعدادات
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teaching Interface -->
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Lesson Content -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-book-open"></i> محتوى الدرس
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="lesson-tabs">
+                        <ul class="nav nav-pills mb-3" id="lessonTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="alphabet-tab" data-bs-toggle="pill" data-bs-target="#alphabet" type="button">
+                                    الأبجدية
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="words-tab" data-bs-toggle="pill" data-bs-target="#words" type="button">
+                                    الكلمات
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="sentences-tab" data-bs-toggle="pill" data-bs-target="#sentences" type="button">
+                                    الجمل
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="custom-tab" data-bs-toggle="pill" data-bs-target="#custom" type="button">
+                                    محتوى مخصص
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="lessonTabsContent">
+                            <!-- Alphabet Tab -->
+                            <div class="tab-pane fade show active" id="alphabet" role="tabpanel">
+                                <div class="row g-2">
+                                    {% for letter in arabic_letters %}
+                                    <div class="col-md-2 col-sm-3 col-4">
+                                        <div class="card letter-teach-card" data-letter="{{ letter }}">
+                                            <div class="card-body text-center p-2">
+                                                <h4 class="arabic-letter">{{ letter }}</h4>
+                                                <button class="btn btn-sm btn-primary" onclick="teachLetter('{{ letter }}')">
+                                                    تدريس
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Words Tab -->
+                            <div class="tab-pane fade" id="words" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>كلمات أساسية</h6>
+                                        <div class="list-group">
+                                            <button class="list-group-item list-group-item-action" onclick="teachWord('بيت')">
+                                                بيت <span class="badge bg-primary rounded-pill">سهل</span>
+                                            </button>
+                                            <button class="list-group-item list-group-item-action" onclick="teachWord('مدرسة')">
+                                                مدرسة <span class="badge bg-warning rounded-pill">متوسط</span>
+                                            </button>
+                                            <button class="list-group-item list-group-item-action" onclick="teachWord('طعام')">
+                                                طعام <span class="badge bg-primary rounded-pill">سهل</span>
+                                            </button>
+                                            <button class="list-group-item list-group-item-action" onclick="teachWord('عائلة')">
+                                                عائلة <span class="badge bg-warning rounded-pill">متوسط</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>كلمات متقدمة</h6>
+                                        <div class="list-group">
+                                            <button class="list-group-item list-group-item-action" onclick="teachWord('تكنولوجيا')">
+                                                تكنولوجيا <span class="badge bg-danger rounded-pill">صعب</span>
+                                            </button>
+                                            <button class="list-group-item list-group-item-action" onclick="teachWord('مستشفى')">
+                                                مستشفى <span class="badge bg-warning rounded-pill">متوسط</span>
+                                            </button>
+                                            <button class="list-group-item list-group-item-action" onclick="teachWord('جامعة')">
+                                                جامعة <span class="badge bg-warning rounded-pill">متوسط</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sentences Tab -->
+                            <div class="tab-pane fade" id="sentences" role="tabpanel">
+                                {% for phrase in common_phrases %}
+                                <div class="card mb-2">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="arabic-text">{{ phrase }}</span>
+                                            <button class="btn btn-sm btn-success" onclick="teachSentence('{{ phrase }}')">
+                                                تدريس الجملة
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Custom Content Tab -->
+                            <div class="tab-pane fade" id="custom" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="mb-3">
+                                            <label for="customContent" class="form-label">إنشاء محتوى مخصص</label>
+                                            <textarea class="form-control" id="customContent" rows="4" placeholder="أدخل النص الذي تريد تدريسه..."></textarea>
+                                        </div>
+                                        <button class="btn btn-primary" onclick="createCustomLesson()">
+                                            إنشاء درس مخصص
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6>الدروس المحفوظة</h6>
+                                        <div id="savedLessons" class="list-group">
+                                            <!-- Saved lessons will appear here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Demonstration -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-video"></i> العرض المباشر
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="demo-area text-center">
+                        <div id="teacherDemo" class="demo-display">
+                            <div class="demo-placeholder">
+                                <i class="fas fa-chalkboard-teacher fa-4x text-muted"></i>
+                                <p class="text-muted mt-2">منطقة العرض التفاعلي</p>
+                                <p class="text-small">اختر محتوى من القوائم أعلاه لبدء التدريس</p>
+                            </div>
+                        </div>
+                        
+                        <div class="demo-controls mt-3">
+                            <button class="btn btn-success" id="startDemo" onclick="startTeacherDemo()">
+                                <i class="fas fa-play"></i> بدء العرض
+                            </button>
+                            <button class="btn btn-warning" id="pauseDemo" onclick="pauseDemo()" disabled>
+                                <i class="fas fa-pause"></i> إيقاف مؤقت
+                            </button>
+                            <button class="btn btn-danger" id="stopDemo" onclick="stopDemo()" disabled>
+                                <i class="fas fa-stop"></i> إيقاف
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Classroom Control Panel -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-users"></i> لوحة التحكم
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Classroom Stats -->
+                    <div class="stats-grid">
+                        <div class="stat-item text-center mb-3">
+                            <h3 class="text-primary" id="activeStudents">0</h3>
+                            <small class="text-muted">طالب نشط</small>
+                        </div>
+                        <div class="stat-item text-center mb-3">
+                            <h3 class="text-success" id="completedExercises">0</h3>
+                            <small class="text-muted">تمرين مكتمل</small>
+                        </div>
+                        <div class="stat-item text-center mb-3">
+                            <h3 class="text-info" id="avgAccuracy">0%</h3>
+                            <small class="text-muted">متوسط الدقة</small>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <h6>إجراءات سريعة</h6>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-primary btn-sm" onclick="sendMessage()">
+                                <i class="fas fa-envelope"></i> إرسال رسالة للطلاب
+                            </button>
+                            <button class="btn btn-outline-success btn-sm" onclick="startQuiz()">
+                                <i class="fas fa-question-circle"></i> بدء اختبار سريع
+                            </button>
+                            <button class="btn btn-outline-info btn-sm" onclick="shareScreen()">
+                                <i class="fas fa-desktop"></i> مشاركة الشاشة
+                            </button>
+                            <button class="btn btn-outline-warning btn-sm" onclick="recordSession()">
+                                <i class="fas fa-record-vinyl"></i> تسجيل الجلسة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Lesson Progress -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie"></i> تقدم الدرس الحالي
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="progress-item mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>المحتوى المكتمل</span>
+                            <span>75%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-item mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>مشاركة الطلاب</span>
+                            <span>85%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-info" style="width: 85%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-item mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>دقة الإجابات</span>
+                            <span>92%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-warning" style="width: 92%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Lesson Notes -->
+                    <div class="mt-4">
+                        <h6>ملاحظات الدرس</h6>
+                        <textarea class="form-control" id="lessonNotes" rows="3" placeholder="اكتب ملاحظاتك هنا..."></textarea>
+                        <button class="btn btn-sm btn-primary mt-2" onclick="saveNotes()">
+                            حفظ الملاحظات
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Students Modal -->
+<div class="modal fade" id="studentsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إدارة الطلاب</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>اسم الطالب</th>
+                                <th>المستوى</th>
+                                <th>التقدم</th>
+                                <th>آخر نشاط</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTable">
+                            <!-- Students data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lessons Modal -->
+<div class="modal fade" id="lessonsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إدارة خطط الدروس</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>الدروس المتاحة</h6>
+                        <div class="list-group" id="availableLessons">
+                            <!-- Available lessons -->
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>إنشاء درس جديد</h6>
+                        <form id="newLessonForm">
+                            <div class="mb-3">
+                                <label class="form-label">عنوان الدرس</label>
+                                <input type="text" class="form-control" id="lessonTitle">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">الوصف</label>
+                                <textarea class="form-control" id="lessonDescription" rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">المستوى</label>
+                                <select class="form-control" id="lessonLevel">
+                                    <option value="beginner">مبتدئ</option>
+                                    <option value="intermediate">متوسط</option>
+                                    <option value="advanced">متقدم</option>
+                                </select>
+                            </div>
+                            <button type="button" class="btn btn-primary" onclick="createLesson()">
+                                إنشاء الدرس
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Teacher mode functionality
+let currentTeachingContent = null;
+let demoActive = false;
+
+function teachLetter(letter) {
+    currentTeachingContent = { type: 'letter', content: letter };
+    document.getElementById('teacherDemo').innerHTML = `
+        <div class="teaching-content">
+            <h2 class="display-1 arabic-letter">${letter}</h2>
+            <p>تدريس حرف "${letter}"</p>
+            <div class="sign-demonstration">
+                <i class="fas fa-hand-paper fa-4x text-primary"></i>
+                <p class="text-muted mt-2">عرض إشارة الحرف</p>
+            </div>
+        </div>
+    `;
+}
+
+function teachWord(word) {
+    currentTeachingContent = { type: 'word', content: word };
+    document.getElementById('teacherDemo').innerHTML = `
+        <div class="teaching-content">
+            <h3 class="arabic-text">${word}</h3>
+            <p>تدريس كلمة "${word}"</p>
+            <div class="word-breakdown">
+                <p class="text-muted">تحليل الكلمة إلى أحرف وإشارات</p>
+            </div>
+        </div>
+    `;
+}
+
+function teachSentence(sentence) {
+    currentTeachingContent = { type: 'sentence', content: sentence };
+    document.getElementById('teacherDemo').innerHTML = `
+        <div class="teaching-content">
+            <h4 class="arabic-text">${sentence}</h4>
+            <p>تدريس جملة "${sentence}"</p>
+            <div class="sentence-breakdown">
+                <p class="text-muted">تحليل الجملة إلى كلمات وإشارات</p>
+            </div>
+        </div>
+    `;
+}
+
+function startTeacherDemo() {
+    if (!currentTeachingContent) {
+        alert('يرجى اختيار محتوى للتدريس أولاً');
+        return;
+    }
+    
+    demoActive = true;
+    document.getElementById('startDemo').disabled = true;
+    document.getElementById('pauseDemo').disabled = false;
+    document.getElementById('stopDemo').disabled = false;
+    
+    // Start the demonstration
+    console.log('بدء عرض:', currentTeachingContent);
+}
+
+function pauseDemo() {
+    if (demoActive) {
+        demoActive = false;
+        document.getElementById('startDemo').disabled = false;
+        document.getElementById('pauseDemo').disabled = true;
+        console.log('إيقاف مؤقت للعرض');
+    }
+}
+
+function stopDemo() {
+    demoActive = false;
+    document.getElementById('startDemo').disabled = false;
+    document.getElementById('pauseDemo').disabled = true;
+    document.getElementById('stopDemo').disabled = true;
+    
+    // Reset demo area
+    document.getElementById('teacherDemo').innerHTML = `
+        <div class="demo-placeholder">
+            <i class="fas fa-chalkboard-teacher fa-4x text-muted"></i>
+            <p class="text-muted mt-2">منطقة العرض التفاعلي</p>
+            <p class="text-small">اختر محتوى من القوائم أعلاه لبدء التدريس</p>
+        </div>
+    `;
+    currentTeachingContent = null;
+}
+
+function createCustomLesson() {
+    const content = document.getElementById('customContent').value.trim();
+    if (!content) {
+        alert('يرجى إدخال محتوى للدرس');
+        return;
+    }
+    
+    currentTeachingContent = { type: 'custom', content: content };
+    document.getElementById('teacherDemo').innerHTML = `
+        <div class="teaching-content">
+            <h4 class="arabic-text">${content}</h4>
+            <p>درس مخصص</p>
+            <div class="custom-content">
+                <p class="text-muted">تحليل المحتوى المخصص</p>
+            </div>
+        </div>
+    `;
+    
+    // Add to saved lessons
+    const savedLessons = document.getElementById('savedLessons');
+    const lessonItem = document.createElement('div');
+    lessonItem.className = 'list-group-item';
+    lessonItem.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center">
+            <span>${content.substring(0, 30)}${content.length > 30 ? '...' : ''}</span>
+            <button class="btn btn-sm btn-outline-primary" onclick="loadCustomLesson('${content}')">
+                تحميل
+            </button>
+        </div>
+    `;
+    savedLessons.appendChild(lessonItem);
+    
+    document.getElementById('customContent').value = '';
+}
+
+function loadCustomLesson(content) {
+    teachSentence(content);
+}
+
+function generateReport() {
+    // Generate and download a progress report
+    alert('سيتم إنشاء تقرير مفصل عن تقدم الطلاب');
+}
+
+function sendMessage() {
+    const message = prompt('اكتب رسالتك للطلاب:');
+    if (message) {
+        alert(`تم إرسال الرسالة: "${message}"`);
+    }
+}
+
+function startQuiz() {
+    alert('سيتم بدء اختبار سريع للطلاب');
+}
+
+function shareScreen() {
+    alert('سيتم تفعيل مشاركة الشاشة');
+}
+
+function recordSession() {
+    alert('سيتم بدء تسجيل الجلسة');
+}
+
+function saveNotes() {
+    const notes = document.getElementById('lessonNotes').value;
+    if (notes.trim()) {
+        alert('تم حفظ ملاحظات الدرس');
+        console.log('ملاحظات محفوظة:', notes);
+    }
+}
+
+function createLesson() {
+    const title = document.getElementById('lessonTitle').value;
+    const description = document.getElementById('lessonDescription').value;
+    const level = document.getElementById('lessonLevel').value;
+    
+    if (!title || !description) {
+        alert('يرجى ملء جميع الحقول المطلوبة');
+        return;
+    }
+    
+    alert(`تم إنشاء درس جديد: "${title}"`);
+    
+    // Clear form
+    document.getElementById('newLessonForm').reset();
+}
+
+// Initialize teacher dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    // Update stats (in a real app, this would come from the server)
+    document.getElementById('activeStudents').textContent = '15';
+    document.getElementById('completedExercises').textContent = '47';
+    document.getElementById('avgAccuracy').textContent = '87%';
+    
+    // Load students data
+    loadStudentsData();
+    loadLessonsData();
+});
+
+function loadStudentsData() {
+    // Simulate loading students data
+    const studentsTable = document.getElementById('studentsTable');
+    const students = [
+        { name: 'أحمد محمد', level: 'مبتدئ', progress: '75%', lastActivity: 'منذ ساعة' },
+        { name: 'فاطمة علي', level: 'متوسط', progress: '90%', lastActivity: 'منذ 30 دقيقة' },
+        { name: 'عمر خالد', level: 'مبتدئ', progress: '60%', lastActivity: 'منذ ساعتين' }
+    ];
+    
+    students.forEach(student => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${student.name}</td>
+            <td><span class="badge bg-info">${student.level}</span></td>
+            <td>
+                <div class="progress">
+                    <div class="progress-bar" style="width: ${student.progress}"></div>
+                </div>
+                <small>${student.progress}</small>
+            </td>
+            <td>${student.lastActivity}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary">عرض</button>
+                <button class="btn btn-sm btn-outline-success">رسالة</button>
+            </td>
+        `;
+        studentsTable.appendChild(row);
+    });
+}
+
+function loadLessonsData() {
+    // Simulate loading lessons data
+    const availableLessons = document.getElementById('availableLessons');
+    const lessons = [
+        { title: 'الأحرف الأساسية', level: 'مبتدئ', duration: '30 دقيقة' },
+        { title: 'الكلمات اليومية', level: 'متوسط', duration: '45 دقيقة' },
+        { title: 'الجمل المركبة', level: 'متقدم', duration: '60 دقيقة' }
+    ];
+    
+    lessons.forEach(lesson => {
+        const item = document.createElement('div');
+        item.className = 'list-group-item';
+        item.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1">${lesson.title}</h6>
+                    <small class="text-muted">${lesson.level} • ${lesson.duration}</small>
+                </div>
+                <button class="btn btn-sm btn-outline-primary">اختيار</button>
+            </div>
+        `;
+        availableLessons.appendChild(item);
+    });
+}
+</script>
+{% endblock %}

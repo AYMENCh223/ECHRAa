@@ -1,0 +1,674 @@
+{% extends "base.html" %}
+
+{% block title %}جمع البيانات - مترجم لغة الإشارة العربية{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1 class="display-5">جمع البيانات لتحسين النموذج</h1>
+            <p class="lead">ساعدنا في تحسين دقة الترجمة من خلال المساهمة في جمع البيانات</p>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle"></i> تعليمات المساهمة</h5>
+                <ul class="mb-0">
+                    <li>اختر الحرف أو العبارة التي تريد تسجيل إشارتها</li>
+                    <li>تأكد من وضوح الإضاءة ووضوح اليد في الكاميرا</li>
+                    <li>اعمل الإشارة بوضوح واستمر لمدة 3-5 ثوان</li>
+                    <li>يمكنك تسجيل عدة محاولات لكل إشارة لزيادة دقة النموذج</li>
+                    <li>جميع البيانات ستُستخدم لتحسين النموذج ولن تُشارك مع أطراف ثالثة</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collection Interface -->
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Selection Tabs -->
+            <ul class="nav nav-tabs mb-4" id="collectionTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="letters-collection-tab" data-bs-toggle="tab" data-bs-target="#letters-collection" type="button">
+                        <i class="fas fa-font"></i> الأحرف العربية
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="phrases-collection-tab" data-bs-toggle="tab" data-bs-target="#phrases-collection" type="button">
+                        <i class="fas fa-comments"></i> العبارات الشائعة
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="custom-collection-tab" data-bs-toggle="tab" data-bs-target="#custom-collection" type="button">
+                        <i class="fas fa-plus"></i> إشارات مخصصة
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="collectionTabsContent">
+                <!-- Arabic Letters Collection -->
+                <div class="tab-pane fade show active" id="letters-collection" role="tabpanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">تسجيل الأحرف العربية</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2 mb-4">
+                                {% for letter in arabic_letters %}
+                                <div class="col-md-2 col-sm-3 col-4">
+                                    <button class="btn btn-outline-primary w-100 letter-select-btn" 
+                                            data-letter="{{ letter }}" 
+                                            onclick="selectForCollection('letter', '{{ letter }}')">
+                                        <span class="arabic-letter">{{ letter }}</span>
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div id="letterProgress" class="progress mb-3" style="display: none;">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <div id="selectedLetter" class="mb-3">
+                                    <h3>اختر حرفاً لبدء التسجيل</h3>
+                                </div>
+                                
+                                <div class="collection-controls">
+                                    <button class="btn btn-success btn-lg" id="startLetterCollection" onclick="startCollection()" disabled>
+                                        <i class="fas fa-record-vinyl"></i> بدء التسجيل
+                                    </button>
+                                    <button class="btn btn-danger btn-lg" id="stopLetterCollection" onclick="stopCollection()" disabled style="display: none;">
+                                        <i class="fas fa-stop"></i> إيقاف التسجيل
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phrases Collection -->
+                <div class="tab-pane fade" id="phrases-collection" role="tabpanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">تسجيل العبارات الشائعة</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3 mb-4">
+                                {% for phrase in common_phrases %}
+                                <div class="col-md-6 col-12">
+                                    <button class="btn btn-outline-success w-100 phrase-select-btn" 
+                                            data-phrase="{{ phrase }}" 
+                                            onclick="selectForCollection('phrase', '{{ phrase }}')">
+                                        <span class="arabic-text">{{ phrase }}</span>
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="text-center">
+                                <div id="selectedPhrase" class="mb-3">
+                                    <h3>اختر عبارة لبدء التسجيل</h3>
+                                </div>
+                                
+                                <div class="collection-controls">
+                                    <button class="btn btn-success btn-lg" id="startPhraseCollection" onclick="startCollection()" disabled>
+                                        <i class="fas fa-record-vinyl"></i> بدء التسجيل
+                                    </button>
+                                    <button class="btn btn-danger btn-lg" id="stopPhraseCollection" onclick="stopCollection()" disabled style="display: none;">
+                                        <i class="fas fa-stop"></i> إيقاف التسجيل
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom Collection -->
+                <div class="tab-pane fade" id="custom-collection" role="tabpanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">تسجيل إشارات مخصصة</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <label for="customSignText" class="form-label">أدخل النص المراد تسجيل إشارته:</label>
+                                <input type="text" class="form-control" id="customSignText" placeholder="مثال: مرحبا بكم">
+                                <small class="form-text text-muted">يمكنك إدخال كلمة أو عبارة جديدة غير موجودة في القوائم</small>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="signCategory" class="form-label">فئة الإشارة:</label>
+                                <select class="form-control" id="signCategory">
+                                    <option value="greeting">تحية</option>
+                                    <option value="family">عائلة</option>
+                                    <option value="food">طعام</option>
+                                    <option value="emotion">مشاعر</option>
+                                    <option value="action">أفعال</option>
+                                    <option value="object">أشياء</option>
+                                    <option value="other">أخرى</option>
+                                </select>
+                            </div>
+                            
+                            <div class="text-center">
+                                <div id="customSignDisplay" class="mb-3">
+                                    <h3>أدخل النص أعلاه لبدء التسجيل</h3>
+                                </div>
+                                
+                                <div class="collection-controls">
+                                    <button class="btn btn-success btn-lg" id="startCustomCollection" onclick="startCustomCollection()" disabled>
+                                        <i class="fas fa-record-vinyl"></i> بدء التسجيل
+                                    </button>
+                                    <button class="btn btn-danger btn-lg" id="stopCustomCollection" onclick="stopCollection()" disabled style="display: none;">
+                                        <i class="fas fa-stop"></i> إيقاف التسجيل
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Camera and Status Panel -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-camera"></i> كاميرا التسجيل
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="collectionVideoContainer" class="text-center mb-3">
+                        <div id="collectionVideoPlaceholder" class="video-placeholder">
+                            <i class="fas fa-camera fa-4x text-muted mb-3"></i>
+                            <p class="text-muted">اضغط "تفعيل الكاميرا" للبدء</p>
+                        </div>
+                        <video id="collectionVideo" class="img-fluid rounded" style="display: none;" width="100%" height="300"></video>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" id="enableCollectionCamera" onclick="enableCollectionCamera()">
+                            <i class="fas fa-video"></i> تفعيل الكاميرا
+                        </button>
+                        <button class="btn btn-secondary" id="disableCollectionCamera" onclick="disableCollectionCamera()" style="display: none;">
+                            <i class="fas fa-video-slash"></i> إيقاف الكاميرا
+                        </button>
+                    </div>
+                    
+                    <!-- Recording Status -->
+                    <div id="recordingStatus" class="mt-3" style="display: none;">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-circle text-danger blink"></i>
+                            <strong>جاري التسجيل...</strong>
+                            <div class="progress mt-2">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     id="recordingProgress" style="width: 0%"></div>
+                            </div>
+                            <small>مدة التسجيل: <span id="recordingTimer">0</span> ثانية</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Collection Statistics -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar"></i> إحصائيات مساهمتك
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="stat-item mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>إجمالي التسجيلات</span>
+                            <span class="fw-bold" id="totalRecordings">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>أحرف مسجلة</span>
+                            <span class="fw-bold" id="recordedLetters">0/28</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" id="lettersProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>عبارات مسجلة</span>
+                            <span class="fw-bold" id="recordedPhrases">0/7</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" id="phrasesProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>إشارات مخصصة</span>
+                            <span class="fw-bold" id="customSigns">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="d-flex justify-content-between">
+                            <span>نقاط المساهمة</span>
+                            <span class="fw-bold text-primary" id="contributionPoints">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contribution Guidelines -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb"></i> نصائح للتسجيل الجيد
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i>
+                            استخدم إضاءة جيدة وواضحة
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i>
+                            اجعل خلفية التسجيل بسيطة
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i>
+                            تأكد من ظهور اليد بوضوح كامل
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i>
+                            اعمل الإشارة ببطء ووضوح
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i>
+                            كرر كل إشارة 3-5 مرات
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i>
+                            حافظ على ثبات الكاميرا
+                        </li>
+                    </ul>
+                    
+                    <!-- Quality Meter -->
+                    <div class="mt-3">
+                        <label class="form-label">جودة التسجيل الحالي:</label>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" id="qualityMeter" style="width: 0%"></div>
+                        </div>
+                        <small class="text-muted" id="qualityText">ابدأ التسجيل لقياس الجودة</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="recordingSuccessModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle text-success"></i>
+                    تم التسجيل بنجاح!
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <i class="fas fa-star fa-3x text-warning mb-3"></i>
+                    <h4>شكراً لك على مساهمتك!</h4>
+                    <p class="lead">تم حفظ تسجيلك بنجاح وسيساعد في تحسين دقة النموذج.</p>
+                    <div class="alert alert-info">
+                        <strong>حصلت على <span id="earnedPoints">10</span> نقطة مساهمة!</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">متابعة التسجيل</button>
+                <button type="button" class="btn btn-success" onclick="shareContribution()">مشاركة إنجازي</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Collection variables
+let collectionCamera = null;
+let isRecording = false;
+let recordingTimer = null;
+let currentSelection = { type: null, content: null };
+let recordingData = [];
+let collectionStats = {
+    totalRecordings: 0,
+    recordedLetters: 0,
+    recordedPhrases: 0,
+    customSigns: 0,
+    points: 0
+};
+
+// Initialize collection interface
+document.addEventListener('DOMContentLoaded', function() {
+    updateCollectionStats();
+    setupCustomSignInput();
+});
+
+function selectForCollection(type, content) {
+    currentSelection = { type, content };
+    
+    // Remove active class from all buttons
+    document.querySelectorAll('.letter-select-btn, .phrase-select-btn').forEach(btn => {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline-primary');
+    });
+    
+    // Add active class to selected button
+    const selector = type === 'letter' ? `[data-letter="${content}"]` : `[data-phrase="${content}"]`;
+    const selectedBtn = document.querySelector(selector);
+    if (selectedBtn) {
+        selectedBtn.classList.remove('btn-outline-primary');
+        selectedBtn.classList.add('btn-primary');
+    }
+    
+    // Update display
+    if (type === 'letter') {
+        document.getElementById('selectedLetter').innerHTML = `
+            <h2 class="arabic-letter display-3">${content}</h2>
+            <p>استعد لتسجيل إشارة حرف "${content}"</p>
+        `;
+        document.getElementById('startLetterCollection').disabled = false;
+    } else if (type === 'phrase') {
+        document.getElementById('selectedPhrase').innerHTML = `
+            <h3 class="arabic-text">${content}</h3>
+            <p>استعد لتسجيل إشارة "${content}"</p>
+        `;
+        document.getElementById('startPhraseCollection').disabled = false;
+    }
+}
+
+function setupCustomSignInput() {
+    const customInput = document.getElementById('customSignText');
+    const customDisplay = document.getElementById('customSignDisplay');
+    const startButton = document.getElementById('startCustomCollection');
+    
+    customInput.addEventListener('input', function() {
+        const text = this.value.trim();
+        if (text) {
+            customDisplay.innerHTML = `
+                <h3 class="arabic-text">${text}</h3>
+                <p>استعد لتسجيل إشارة "${text}"</p>
+            `;
+            startButton.disabled = false;
+            currentSelection = { type: 'custom', content: text };
+        } else {
+            customDisplay.innerHTML = '<h3>أدخل النص أعلاه لبدء التسجيل</h3>';
+            startButton.disabled = true;
+            currentSelection = { type: null, content: null };
+        }
+    });
+}
+
+function enableCollectionCamera() {
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            collectionCamera = stream;
+            const video = document.getElementById('collectionVideo');
+            video.srcObject = stream;
+            video.play();
+            
+            // Show video, hide placeholder
+            document.getElementById('collectionVideoPlaceholder').style.display = 'none';
+            video.style.display = 'block';
+            
+            // Update buttons
+            document.getElementById('enableCollectionCamera').style.display = 'none';
+            document.getElementById('disableCollectionCamera').style.display = 'block';
+            
+            // Start quality monitoring
+            startQualityMonitoring();
+        })
+        .catch(err => {
+            console.error('Error accessing camera:', err);
+            alert('خطأ في الوصول للكاميرا. يرجى التأكد من السماح للموقع بالوصول للكاميرا.');
+        });
+}
+
+function disableCollectionCamera() {
+    if (collectionCamera) {
+        collectionCamera.getTracks().forEach(track => track.stop());
+        collectionCamera = null;
+    }
+    
+    const video = document.getElementById('collectionVideo');
+    video.style.display = 'none';
+    document.getElementById('collectionVideoPlaceholder').style.display = 'block';
+    
+    // Update buttons
+    document.getElementById('enableCollectionCamera').style.display = 'block';
+    document.getElementById('disableCollectionCamera').style.display = 'none';
+    
+    // Stop recording if active
+    if (isRecording) {
+        stopCollection();
+    }
+}
+
+function startCollection() {
+    if (!collectionCamera) {
+        alert('يرجى تفعيل الكاميرا أولاً');
+        return;
+    }
+    
+    if (!currentSelection.content) {
+        alert('يرجى اختيار إشارة للتسجيل');
+        return;
+    }
+    
+    isRecording = true;
+    let recordingTime = 0;
+    const maxRecordingTime = 10; // 10 seconds max
+    
+    // Show recording status
+    document.getElementById('recordingStatus').style.display = 'block';
+    
+    // Update UI
+    document.querySelectorAll('[id*="start"][id*="Collection"]').forEach(btn => {
+        btn.style.display = 'none';
+    });
+    document.querySelectorAll('[id*="stop"][id*="Collection"]').forEach(btn => {
+        btn.style.display = 'inline-block';
+        btn.disabled = false;
+    });
+    
+    // Start recording timer
+    recordingTimer = setInterval(() => {
+        recordingTime++;
+        document.getElementById('recordingTimer').textContent = recordingTime;
+        
+        const progress = (recordingTime / maxRecordingTime) * 100;
+        document.getElementById('recordingProgress').style.width = progress + '%';
+        
+        // Auto-stop after max time
+        if (recordingTime >= maxRecordingTime) {
+            stopCollection();
+        }
+    }, 1000);
+    
+    // Simulate data collection
+    console.log('بدء تسجيل:', currentSelection);
+}
+
+function startCustomCollection() {
+    const customText = document.getElementById('customSignText').value.trim();
+    const category = document.getElementById('signCategory').value;
+    
+    if (!customText) {
+        alert('يرجى إدخال النص المراد تسجيله');
+        return;
+    }
+    
+    currentSelection = { 
+        type: 'custom', 
+        content: customText, 
+        category: category 
+    };
+    
+    startCollection();
+}
+
+function stopCollection() {
+    if (!isRecording) return;
+    
+    isRecording = false;
+    
+    // Stop timer
+    if (recordingTimer) {
+        clearInterval(recordingTimer);
+        recordingTimer = null;
+    }
+    
+    // Hide recording status
+    document.getElementById('recordingStatus').style.display = 'none';
+    
+    // Update UI
+    document.querySelectorAll('[id*="start"][id*="Collection"]').forEach(btn => {
+        btn.style.display = 'inline-block';
+    });
+    document.querySelectorAll('[id*="stop"][id*="Collection"]').forEach(btn => {
+        btn.style.display = 'none';
+    });
+    
+    // Save recording data
+    saveRecordingData();
+    
+    // Show success modal
+    showRecordingSuccess();
+}
+
+function saveRecordingData() {
+    // Simulate saving the recording
+    const recordingInfo = {
+        type: currentSelection.type,
+        content: currentSelection.content,
+        category: currentSelection.category || 'default',
+        timestamp: new Date().toISOString(),
+        duration: document.getElementById('recordingTimer').textContent
+    };
+    
+    recordingData.push(recordingInfo);
+    
+    // Update statistics
+    collectionStats.totalRecordings++;
+    
+    if (currentSelection.type === 'letter') {
+        collectionStats.recordedLetters++;
+    } else if (currentSelection.type === 'phrase') {
+        collectionStats.recordedPhrases++;
+    } else if (currentSelection.type === 'custom') {
+        collectionStats.customSigns++;
+    }
+    
+    // Award points
+    const points = currentSelection.type === 'custom' ? 15 : 10;
+    collectionStats.points += points;
+    document.getElementById('earnedPoints').textContent = points;
+    
+    updateCollectionStats();
+    
+    console.log('تم حفظ التسجيل:', recordingInfo);
+}
+
+function updateCollectionStats() {
+    document.getElementById('totalRecordings').textContent = collectionStats.totalRecordings;
+    document.getElementById('recordedLetters').textContent = `${collectionStats.recordedLetters}/28`;
+    document.getElementById('recordedPhrases').textContent = `${collectionStats.recordedPhrases}/7`;
+    document.getElementById('customSigns').textContent = collectionStats.customSigns;
+    document.getElementById('contributionPoints').textContent = collectionStats.points;
+    
+    // Update progress bars
+    const lettersPercent = (collectionStats.recordedLetters / 28) * 100;
+    const phrasesPercent = (collectionStats.recordedPhrases / 7) * 100;
+    
+    document.getElementById('lettersProgress').style.width = lettersPercent + '%';
+    document.getElementById('phrasesProgress').style.width = phrasesPercent + '%';
+}
+
+function startQualityMonitoring() {
+    // Simulate quality monitoring
+    setInterval(() => {
+        if (collectionCamera && !isRecording) {
+            // Simulate quality check based on lighting, hand visibility, etc.
+            const quality = Math.random() * 100;
+            const qualityMeter = document.getElementById('qualityMeter');
+            const qualityText = document.getElementById('qualityText');
+            
+            qualityMeter.style.width = quality + '%';
+            
+            if (quality >= 80) {
+                qualityMeter.className = 'progress-bar bg-success';
+                qualityText.textContent = 'جودة ممتازة';
+            } else if (quality >= 60) {
+                qualityMeter.className = 'progress-bar bg-warning';
+                qualityText.textContent = 'جودة جيدة';
+            } else {
+                qualityMeter.className = 'progress-bar bg-danger';
+                qualityText.textContent = 'جودة ضعيفة - تحسين الإضاءة مطلوب';
+            }
+        }
+    }, 2000);
+}
+
+function showRecordingSuccess() {
+    const modal = new bootstrap.Modal(document.getElementById('recordingSuccessModal'));
+    modal.show();
+}
+
+function shareContribution() {
+    // Simulate sharing functionality
+    const message = `لقد ساهمت في تحسين مترجم لغة الإشارة العربية! 
+    إجمالي مساهماتي: ${collectionStats.totalRecordings} تسجيل
+    النقاط المكتسبة: ${collectionStats.points} نقطة`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'مساهمتي في مترجم لغة الإشارة العربية',
+            text: message,
+            url: window.location.href
+        });
+    } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(message).then(() => {
+            alert('تم نسخ النص. يمكنك مشاركته في وسائل التواصل الاجتماعي!');
+        });
+    }
+}
+
+// Add blinking animation for recording indicator
+const style = document.createElement('style');
+style.textContent = `
+    .blink {
+        animation: blink 1s infinite;
+    }
+    
+    @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

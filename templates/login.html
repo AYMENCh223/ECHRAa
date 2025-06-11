@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}تسجيل الدخول - مترجم لغة الإشارة العربية{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        تسجيل الدخول
+                    </h3>
+                </div>
+                <div class="card-body p-5">
+                    <form method="POST">
+                        <div class="mb-4">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope me-2"></i>
+                                البريد الإلكتروني
+                            </label>
+                            <input type="email" 
+                                   class="form-control form-control-lg" 
+                                   id="email" 
+                                   name="email" 
+                                   placeholder="أدخل بريدك الإلكتروني" 
+                                   required
+                                   autocomplete="email">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock me-2"></i>
+                                كلمة المرور
+                            </label>
+                            <div class="input-group">
+                                <input type="password" 
+                                       class="form-control form-control-lg" 
+                                       id="password" 
+                                       name="password" 
+                                       placeholder="أدخل كلمة المرور" 
+                                       required
+                                       autocomplete="current-password">
+                                <button class="btn btn-outline-secondary" 
+                                        type="button" 
+                                        id="togglePassword"
+                                        onclick="togglePasswordVisibility()">
+                                    <i class="fas fa-eye" id="passwordIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       id="rememberMe" 
+                                       name="remember_me">
+                                <label class="form-check-label" for="rememberMe">
+                                    تذكرني
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>
+                                تسجيل الدخول
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="mb-3">أو سجل الدخول باستخدام:</p>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-danger" onclick="loginWithGoogle()">
+                                <i class="fab fa-google me-2"></i>
+                                تسجيل الدخول بجوجل
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="loginWithFacebook()">
+                                <i class="fab fa-facebook-f me-2"></i>
+                                تسجيل الدخول بفيسبوك
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="mb-2">
+                            <a href="#" class="text-decoration-none" onclick="forgotPassword()">
+                                نسيت كلمة المرور؟
+                            </a>
+                        </p>
+                        <p class="mb-0">
+                            ليس لديك حساب؟ 
+                            <a href="{{ url_for('auth.signup') }}" class="text-decoration-none fw-bold">
+                                إنشاء حساب جديد
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Demo Account Info -->
+            <div class="card mt-4 border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        للتجربة السريعة
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">يمكنك استخدام أي بريد إلكتروني وكلمة مرور للتجربة</p>
+                    <small class="text-muted">
+                        في حالة عدم توفر اتصال بـ Supabase، سيتم تفعيل وضع التجربة التلقائي
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">جاري التحميل...</span>
+                </div>
+                <h5>جاري تسجيل الدخول...</h5>
+                <p class="text-muted">يرجى الانتظار</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function togglePasswordVisibility() {
+    const passwordInput = document.getElementById('password');
+    const passwordIcon = document.getElementById('passwordIcon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        passwordIcon.className = 'fas fa-eye-slash';
+    } else {
+        passwordInput.type = 'password';
+        passwordIcon.className = 'fas fa-eye';
+    }
+}
+
+function loginWithGoogle() {
+    // In a real implementation, this would integrate with Google OAuth
+    alert('سيتم إعادة توجيهك لتسجيل الدخول بجوجل...');
+    // Example: window.location.href = '/auth/google';
+}
+
+function loginWithFacebook() {
+    // In a real implementation, this would integrate with Facebook OAuth
+    alert('سيتم إعادة توجيهك لتسجيل الدخول بفيسبوك...');
+    // Example: window.location.href = '/auth/facebook';
+}
+
+function forgotPassword() {
+    const email = prompt('أدخل بريدك الإلكتروني لإعادة تعيين كلمة المرور:');
+    if (email) {
+        // In a real implementation, this would send a password reset email
+        alert(`تم إرسال رابط إعادة تعيين كلمة المرور إلى: ${email}`);
+    }
+}
+
+// Form submission handler
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    
+    form.addEventListener('submit', function(e) {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        
+        if (!email || !password) {
+            e.preventDefault();
+            alert('يرجى ملء جميع الحقول المطلوبة');
+            return;
+        }
+        
+        // Show loading modal
+        const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+        loadingModal.show();
+        
+        // In case of error, hide the modal (this would be handled by server response)
+        setTimeout(() => {
+            // This timeout is just for demo, real implementation would handle this in response
+        }, 1000);
+    });
+    
+    // Auto-fill demo credentials for testing
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('demo') === 'true') {
+        document.getElementById('email').value = 'demo@example.com';
+        document.getElementById('password').value = 'demo123';
+    }
+});
+
+// Add smooth animation to form elements
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('.form-control');
+    
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            if (!this.value) {
+                this.parentElement.classList.remove('focused');
+            }
+        });
+    });
+});
+</script>
+
+<style>
+.focused .form-label {
+    color: #0d6efd;
+    font-weight: 600;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+</style>
+{% endblock %}

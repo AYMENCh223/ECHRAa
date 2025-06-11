@@ -1,0 +1,656 @@
+{% extends "base.html" %}
+
+{% block title %}وضع الأطفال - مترجم لغة الإشارة العربية{% endblock %}
+
+{% block head %}
+<style>
+/* Kid-friendly styles */
+.kids-mode {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.kids-card {
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border: 3px solid #ffd700;
+}
+
+.fun-button {
+    border-radius: 25px;
+    font-size: 1.2em;
+    padding: 15px 30px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.fun-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.letter-fun-card {
+    border-radius: 15px;
+    border: 2px solid #ff6b6b;
+    background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 100%);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.letter-fun-card:hover {
+    transform: scale(1.1);
+    border-color: #ff3333;
+}
+
+.game-area {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    min-height: 300px;
+}
+
+.score-display {
+    background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+    border-radius: 15px;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.reward-animation {
+    animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-30px);
+    }
+    60% {
+        transform: translateY(-15px);
+    }
+}
+
+.star-rating {
+    font-size: 2em;
+    color: #ffd700;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="kids-mode">
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <h1 class="display-4 text-white mb-3">
+                    <i class="fas fa-child"></i> 
+                    مرحباً بك في عالم الإشارات المرح! 
+                    <i class="fas fa-star reward-animation"></i>
+                </h1>
+                <p class="lead text-white">تعلم لغة الإشارة العربية بطريقة ممتعة ومسلية</p>
+            </div>
+        </div>
+
+        <!-- Game Selection -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="kids-card card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-gamepad fa-4x text-primary mb-3"></i>
+                        <h4 class="card-title">ألعاب الحروف</h4>
+                        <p class="card-text">العب واتعلم الحروف العربية</p>
+                        <button class="btn btn-primary fun-button" onclick="startLetterGame()">
+                            ابدأ اللعب! 🎮
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="kids-card card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-puzzle-piece fa-4x text-success mb-3"></i>
+                        <h4 class="card-title">ألعاب الكلمات</h4>
+                        <p class="card-text">اكتشف الكلمات الجديدة</p>
+                        <button class="btn btn-success fun-button" onclick="startWordGame()">
+                            اكتشف الكلمات! 🧩
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="kids-card card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-trophy fa-4x text-warning mb-3"></i>
+                        <h4 class="card-title">التحدي اليومي</h4>
+                        <p class="card-text">تحدى نفسك واربح النجوم</p>
+                        <button class="btn btn-warning fun-button" onclick="startDailyChallenge()">
+                            التحدي! 🏆
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Area -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="kids-card card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-play"></i> منطقة اللعب
+                            <span id="gameTitle" class="ms-3">اختر لعبة للبدء</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="gameArea" class="game-area">
+                            <!-- Welcome Screen -->
+                            <div id="welcomeScreen" class="text-center">
+                                <i class="fas fa-rainbow fa-5x text-success mb-4"></i>
+                                <h3>مرحباً بك في عالم التعلم المرح!</h3>
+                                <p class="lead">اختر لعبة من الأزرار أعلاه لتبدأ المغامرة</p>
+                                <div class="row mt-4">
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-medal fa-2x text-gold mb-2"></i>
+                                                <h6>اجمع النجوم</h6>
+                                                <small>احصل على نجوم عند الإجابة الصحيحة</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-heart fa-2x text-danger mb-2"></i>
+                                                <h6>تعلم بالحب</h6>
+                                                <small>كل خطأ هو فرصة للتعلم</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card bg-light">
+                                            <div class="card-body text-center">
+                                                <i class="fas fa-gift fa-2x text-purple mb-2"></i>
+                                                <h6>مكافآت مرحة</h6>
+                                                <small>اكسب شارات ومكافآت رائعة</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Letter Game -->
+                            <div id="letterGame" style="display: none;">
+                                <div class="text-center mb-4">
+                                    <h3>لعبة الحروف المرحة</h3>
+                                    <p>اضغط على الحرف الصحيح!</p>
+                                </div>
+                                
+                                <div class="row mb-4">
+                                    <div class="col-12 text-center">
+                                        <div id="currentLetter" class="display-1 mb-3" style="font-size: 8rem;">
+                                            <!-- Current letter will appear here -->
+                                        </div>
+                                        <div id="letterInstruction" class="h4 text-primary">
+                                            <!-- Instruction will appear here -->
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row" id="letterOptions">
+                                    <!-- Letter options will appear here -->
+                                </div>
+                                
+                                <div class="text-center mt-4">
+                                    <button class="btn btn-success fun-button" onclick="nextLetter()">
+                                        الحرف التالي! 🎯
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Word Game -->
+                            <div id="wordGame" style="display: none;">
+                                <div class="text-center mb-4">
+                                    <h3>لعبة الكلمات الممتعة</h3>
+                                    <p>اختر الكلمة الصحيحة للصورة!</p>
+                                </div>
+                                
+                                <div class="row mb-4">
+                                    <div class="col-12 text-center">
+                                        <div id="wordImage" class="mb-3">
+                                            <i class="fas fa-image fa-5x text-muted"></i>
+                                            <p class="mt-2">صورة الكلمة</p>
+                                        </div>
+                                        <div id="wordInstruction" class="h5 text-success">
+                                            ما هي هذه الكلمة بلغة الإشارة؟
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row" id="wordOptions">
+                                    <!-- Word options will appear here -->
+                                </div>
+                            </div>
+
+                            <!-- Daily Challenge -->
+                            <div id="dailyChallenge" style="display: none;">
+                                <div class="text-center mb-4">
+                                    <h3>التحدي اليومي 🌟</h3>
+                                    <p>أكمل التحديات واحصل على جوائز رائعة!</p>
+                                </div>
+                                
+                                <div class="challenges-list">
+                                    <div class="card mb-3 border-primary">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">تعلم 5 حروف جديدة</h6>
+                                                    <small class="text-muted">التقدم: 3/5</small>
+                                                </div>
+                                                <div class="progress" style="width: 100px;">
+                                                    <div class="progress-bar" style="width: 60%"></div>
+                                                </div>
+                                                <i class="fas fa-star text-warning"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mb-3 border-success">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">العب لمدة 10 دقائق</h6>
+                                                    <small class="text-muted">التقدم: 7/10 دقائق</small>
+                                                </div>
+                                                <div class="progress" style="width: 100px;">
+                                                    <div class="progress-bar bg-success" style="width: 70%"></div>
+                                                </div>
+                                                <i class="fas fa-star text-warning"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mb-3 border-info">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">احصل على 3 إجابات صحيحة متتالية</h6>
+                                                    <small class="text-muted">التقدم: 1/3</small>
+                                                </div>
+                                                <div class="progress" style="width: 100px;">
+                                                    <div class="progress-bar bg-info" style="width: 33%"></div>
+                                                </div>
+                                                <i class="fas fa-star text-warning"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Score and Progress Panel -->
+            <div class="col-lg-4">
+                <div class="kids-card card mb-4">
+                    <div class="card-body score-display">
+                        <h5 class="mb-3">
+                            <i class="fas fa-trophy"></i> نتائجك الرائعة
+                        </h5>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <h3 id="totalStars">⭐ 0</h3>
+                                <small>النجوم</small>
+                            </div>
+                            <div class="col-4">
+                                <h3 id="correctAnswers">✅ 0</h3>
+                                <small>صحيح</small>
+                            </div>
+                            <div class="col-4">
+                                <h3 id="gamesPlayed">🎮 0</h3>
+                                <small>ألعاب</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h6>مستواك:</h6>
+                            <div class="star-rating" id="levelStars">
+                                ⭐⭐⭐☆☆
+                            </div>
+                            <small class="d-block mt-2">المبتدئ الماهر</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Achievements -->
+                <div class="kids-card card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0">
+                            <i class="fas fa-medal"></i> إنجازاتك
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="achievements-list">
+                            <div class="achievement-item mb-2 p-2 bg-light rounded">
+                                <i class="fas fa-check-circle text-success"></i>
+                                <span class="ms-2">أول حرف!</span>
+                            </div>
+                            <div class="achievement-item mb-2 p-2 bg-light rounded">
+                                <i class="fas fa-fire text-orange"></i>
+                                <span class="ms-2">متحمس للتعلم</span>
+                            </div>
+                            <div class="achievement-item mb-2 p-2 bg-light rounded disabled">
+                                <i class="fas fa-star text-muted"></i>
+                                <span class="ms-2">جمع 10 نجوم</span>
+                                <small class="text-muted">(7/10)</small>
+                            </div>
+                            <div class="achievement-item mb-2 p-2 bg-light rounded disabled">
+                                <i class="fas fa-rocket text-muted"></i>
+                                <span class="ms-2">السرعة البرق</span>
+                                <small class="text-muted">محبوس</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="kids-card card">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-chart-bar"></i> إحصائياتك اليوم
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="stat-item mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>وقت اللعب</span>
+                                <span class="fw-bold">15 دقيقة</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-info" style="width: 50%"></div>
+                            </div>
+                            <small class="text-muted">الهدف: 30 دقيقة</small>
+                        </div>
+                        
+                        <div class="stat-item mb-3">
+                            <div class="d-flex justify-content-between">
+                                <span>دقة الإجابات</span>
+                                <span class="fw-bold">85%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="d-flex justify-content-between">
+                                <span>أفضل سلسلة</span>
+                                <span class="fw-bold">5 متتالية</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Celebration Modal -->
+<div class="modal fade" id="celebrationModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0" style="border-radius: 20px;">
+            <div class="modal-body text-center p-5">
+                <div id="celebrationContent">
+                    <!-- Celebration content will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Kids mode game logic
+let currentGame = '';
+let gameScore = { stars: 0, correct: 0, total: 0 };
+let currentQuestionIndex = 0;
+let gameData = {
+    letters: {{ arabic_letters | tojson }},
+    phrases: {{ common_phrases | tojson }}
+};
+
+// Initialize kids mode
+document.addEventListener('DOMContentLoaded', function() {
+    updateScoreDisplay();
+});
+
+function startLetterGame() {
+    currentGame = 'letters';
+    document.getElementById('gameTitle').textContent = 'لعبة الحروف المرحة';
+    hideAllGames();
+    document.getElementById('letterGame').style.display = 'block';
+    currentQuestionIndex = 0;
+    showNextLetter();
+}
+
+function startWordGame() {
+    currentGame = 'words';
+    document.getElementById('gameTitle').textContent = 'لعبة الكلمات الممتعة';
+    hideAllGames();
+    document.getElementById('wordGame').style.display = 'block';
+    showNextWord();
+}
+
+function startDailyChallenge() {
+    currentGame = 'challenge';
+    document.getElementById('gameTitle').textContent = 'التحدي اليومي 🌟';
+    hideAllGames();
+    document.getElementById('dailyChallenge').style.display = 'block';
+}
+
+function hideAllGames() {
+    document.getElementById('welcomeScreen').style.display = 'none';
+    document.getElementById('letterGame').style.display = 'none';
+    document.getElementById('wordGame').style.display = 'none';
+    document.getElementById('dailyChallenge').style.display = 'none';
+}
+
+function showNextLetter() {
+    if (currentQuestionIndex >= gameData.letters.length) {
+        showGameComplete();
+        return;
+    }
+    
+    const currentLetter = gameData.letters[currentQuestionIndex];
+    document.getElementById('currentLetter').textContent = currentLetter;
+    document.getElementById('letterInstruction').textContent = `اضغط على الحرف "${currentLetter}"`;
+    
+    // Create options (correct answer + 3 random ones)
+    const options = [currentLetter];
+    while (options.length < 4) {
+        const randomLetter = gameData.letters[Math.floor(Math.random() * gameData.letters.length)];
+        if (!options.includes(randomLetter)) {
+            options.push(randomLetter);
+        }
+    }
+    
+    // Shuffle options
+    shuffleArray(options);
+    
+    // Display options
+    const optionsContainer = document.getElementById('letterOptions');
+    optionsContainer.innerHTML = '';
+    
+    options.forEach(letter => {
+        const col = document.createElement('div');
+        col.className = 'col-6 col-md-3 mb-3';
+        col.innerHTML = `
+            <div class="letter-fun-card card h-100 text-center" onclick="selectLetter('${letter}', '${currentLetter}')">
+                <div class="card-body">
+                    <h2 class="display-4">${letter}</h2>
+                </div>
+            </div>
+        `;
+        optionsContainer.appendChild(col);
+    });
+}
+
+function selectLetter(selected, correct) {
+    gameScore.total++;
+    
+    if (selected === correct) {
+        gameScore.correct++;
+        gameScore.stars++;
+        showCelebration('أحسنت! 🌟', 'إجابة صحيحة!', 'success');
+        // Add visual feedback
+        event.target.closest('.card').style.background = 'linear-gradient(45deg, #4facfe 0%, #00f2fe 100%)';
+        event.target.closest('.card').style.color = 'white';
+    } else {
+        showCelebration('حاول مرة أخرى! 💪', `الإجابة الصحيحة هي "${correct}"`, 'info');
+        // Add visual feedback
+        event.target.closest('.card').style.background = 'linear-gradient(45deg, #ff9a9e 0%, #fecfef 100%)';
+    }
+    
+    updateScoreDisplay();
+    
+    // Move to next question after delay
+    setTimeout(() => {
+        nextLetter();
+    }, 2000);
+}
+
+function nextLetter() {
+    currentQuestionIndex++;
+    showNextLetter();
+}
+
+function showNextWord() {
+    // Similar logic for word game
+    const words = ['بيت', 'شجرة', 'سيارة', 'كتاب'];
+    const currentWord = words[currentQuestionIndex % words.length];
+    
+    document.getElementById('wordImage').innerHTML = `
+        <i class="fas fa-home fa-5x text-primary"></i>
+        <p class="mt-2">${currentWord}</p>
+    `;
+    
+    // Create word options
+    const optionsContainer = document.getElementById('wordOptions');
+    optionsContainer.innerHTML = '';
+    
+    const options = [currentWord, 'ماء', 'طعام', 'نور'].slice(0, 4);
+    shuffleArray(options);
+    
+    options.forEach(word => {
+        const col = document.createElement('div');
+        col.className = 'col-6 mb-3';
+        col.innerHTML = `
+            <button class="btn btn-outline-primary fun-button w-100" onclick="selectWord('${word}', '${currentWord}')">
+                ${word}
+            </button>
+        `;
+        optionsContainer.appendChild(col);
+    });
+}
+
+function selectWord(selected, correct) {
+    gameScore.total++;
+    
+    if (selected === correct) {
+        gameScore.correct++;
+        gameScore.stars++;
+        showCelebration('ممتاز! 🎉', 'إجابة رائعة!', 'success');
+    } else {
+        showCelebration('قريب جداً! 😊', `الإجابة الصحيحة هي "${correct}"`, 'info');
+    }
+    
+    updateScoreDisplay();
+    
+    setTimeout(() => {
+        currentQuestionIndex++;
+        showNextWord();
+    }, 2000);
+}
+
+function showCelebration(title, message, type) {
+    const celebrationContent = document.getElementById('celebrationContent');
+    const isSuccess = type === 'success';
+    
+    celebrationContent.innerHTML = `
+        <div class="celebration-animation">
+            <i class="fas ${isSuccess ? 'fa-star' : 'fa-heart'} fa-4x ${isSuccess ? 'text-warning' : 'text-danger'} reward-animation mb-3"></i>
+            <h3 class="${isSuccess ? 'text-success' : 'text-info'}">${title}</h3>
+            <p class="lead">${message}</p>
+            ${isSuccess ? '<div class="mt-3">⭐ +1 نجمة!</div>' : ''}
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('celebrationModal'));
+    modal.show();
+    
+    // Auto close after 2 seconds
+    setTimeout(() => {
+        modal.hide();
+    }, 2000);
+}
+
+function showGameComplete() {
+    const accuracy = gameScore.total > 0 ? Math.round((gameScore.correct / gameScore.total) * 100) : 0;
+    showCelebration(
+        'انتهيت من اللعبة! 🎊',
+        `حصلت على ${gameScore.correct} من ${gameScore.total} (${accuracy}%)`,
+        'success'
+    );
+}
+
+function updateScoreDisplay() {
+    document.getElementById('totalStars').textContent = `⭐ ${gameScore.stars}`;
+    document.getElementById('correctAnswers').textContent = `✅ ${gameScore.correct}`;
+    document.getElementById('gamesPlayed').textContent = `🎮 ${Math.ceil(gameScore.total / 5)}`;
+    
+    // Update level based on stars
+    const level = Math.min(5, Math.floor(gameScore.stars / 5) + 1);
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+        stars += i <= level ? '⭐' : '☆';
+    }
+    document.getElementById('levelStars').textContent = stars;
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+// Add some fun sound effects (if audio is available)
+function playSound(type) {
+    // In a real implementation, you would play actual sound files
+    console.log(`Playing ${type} sound`);
+}
+
+// Animate elements on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Add entrance animations
+    const cards = document.querySelectorAll('.kids-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(50px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 200);
+    });
+});
+</script>
+{% endblock %}

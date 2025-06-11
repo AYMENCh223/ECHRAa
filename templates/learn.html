@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block title %}وضع التعلم - مترجم لغة الإشارة العربية{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1 class="display-5">وضع التعلم</h1>
+            <p class="lead">تعلم أحرف وكلمات لغة الإشارة العربية بطريقة تفاعلية</p>
+        </div>
+    </div>
+
+    <!-- Learning Tabs -->
+    <ul class="nav nav-tabs mb-4" id="learningTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="letters-tab" data-bs-toggle="tab" data-bs-target="#letters" type="button">
+                <i class="fas fa-font"></i> الأحرف العربية
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="phrases-tab" data-bs-toggle="tab" data-bs-target="#phrases" type="button">
+                <i class="fas fa-comments"></i> العبارات الشائعة
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="practice-tab" data-bs-toggle="tab" data-bs-target="#practice" type="button">
+                <i class="fas fa-hands"></i> التدريب التفاعلي
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="learningTabsContent">
+        <!-- Arabic Letters Tab -->
+        <div class="tab-pane fade show active" id="letters" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h3>الأحرف العربية</h3>
+                    <p>اضغط على أي حرف لمشاهدة إشارته</p>
+                    
+                    <div class="row g-3">
+                        {% for letter in arabic_letters %}
+                        <div class="col-md-3 col-sm-4 col-6">
+                            <div class="card letter-card h-100 text-center" data-letter="{{ letter }}">
+                                <div class="card-body">
+                                    <h2 class="card-title arabic-letter">{{ letter }}</h2>
+                                    <p class="card-text">{{ letter }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card sticky-top">
+                        <div class="card-header">
+                            <h5>معاينة الإشارة</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="letterPreview" class="text-center">
+                                <div class="letter-display">
+                                    <h1 id="selectedLetter" class="display-1 arabic-letter">أ</h1>
+                                    <p id="letterDescription">اضغط على حرف لمشاهدة إشارته</p>
+                                </div>
+                                
+                                <!-- Placeholder for sign demonstration -->
+                                <div class="sign-demo mt-4">
+                                    <div class="demo-placeholder">
+                                        <i class="fas fa-hand-paper fa-4x text-muted"></i>
+                                        <p class="text-muted mt-2">إشارة الحرف ستظهر هنا</p>
+                                    </div>
+                                </div>
+                                
+                                <button class="btn btn-primary mt-3" id="practiceLetter">
+                                    <i class="fas fa-play"></i> تدرب على هذا الحرف
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Common Phrases Tab -->
+        <div class="tab-pane fade" id="phrases" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h3>العبارات الشائعة</h3>
+                    <p>تعلم أهم العبارات المستخدمة في لغة الإشارة العربية</p>
+                    
+                    <div class="row g-3">
+                        {% for phrase in common_phrases %}
+                        <div class="col-md-6 col-12">
+                            <div class="card phrase-card h-100" data-phrase="{{ phrase }}">
+                                <div class="card-body">
+                                    <h4 class="card-title text-center arabic-text">{{ phrase }}</h4>
+                                    <div class="phrase-demo text-center">
+                                        <i class="fas fa-hands fa-2x text-muted"></i>
+                                        <p class="text-muted mt-2">إشارة العبارة</p>
+                                    </div>
+                                    <button class="btn btn-outline-primary w-100 mt-2">
+                                        <i class="fas fa-play"></i> مشاهدة الإشارة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card sticky-top">
+                        <div class="card-header">
+                            <h5>معاينة العبارة</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="phrasePreview" class="text-center">
+                                <div class="phrase-display">
+                                    <h3 id="selectedPhrase" class="arabic-text">نعم</h3>
+                                    <p id="phraseDescription">اضغط على عبارة لمشاهدة إشارتها</p>
+                                </div>
+                                
+                                <div class="sign-demo mt-4">
+                                    <div class="demo-placeholder">
+                                        <i class="fas fa-hands fa-4x text-muted"></i>
+                                        <p class="text-muted mt-2">إشارة العبارة ستظهر هنا</p>
+                                    </div>
+                                </div>
+                                
+                                <button class="btn btn-success mt-3" id="practicePhrase">
+                                    <i class="fas fa-play"></i> تدرب على هذه العبارة
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Practice Tab -->
+        <div class="tab-pane fade" id="practice" role="tabpanel">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>التدريب التفاعلي</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="practice-controls mb-3">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-primary" id="practiceLetters">
+                                        تدريب على الأحرف
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success" id="practicePhrases">
+                                        تدريب على العبارات
+                                    </button>
+                                    <button type="button" class="btn btn-outline-info" id="practiceQuiz">
+                                        اختبار سريع
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div id="practiceArea">
+                                <div class="text-center">
+                                    <h4 id="practicePrompt">اختر نوع التدريب من الأزرار أعلاه</h4>
+                                    <div class="practice-display mt-4">
+                                        <div id="practiceTarget" class="display-4 arabic-text mb-3">
+                                            <!-- Practice target will appear here -->
+                                        </div>
+                                        <div id="practiceInstructions" class="text-muted">
+                                            <!-- Instructions will appear here -->
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="practice-controls mt-4">
+                                        <button class="btn btn-primary" id="startPractice" style="display: none;">
+                                            <i class="fas fa-play"></i> ابدأ التدريب
+                                        </button>
+                                        <button class="btn btn-secondary" id="nextPractice" style="display: none;">
+                                            <i class="fas fa-forward"></i> التالي
+                                        </button>
+                                        <button class="btn btn-success" id="checkAnswer" style="display: none;">
+                                            <i class="fas fa-check"></i> تحقق من الإجابة
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>كاميرا التدريب</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="practiceCamera" class="text-center">
+                                <div class="camera-placeholder">
+                                    <i class="fas fa-camera fa-3x text-muted"></i>
+                                    <p class="text-muted mt-2">ستظهر الكاميرا هنا أثناء التدريب</p>
+                                </div>
+                                
+                                <button class="btn btn-primary mt-3" id="enablePracticeCamera">
+                                    <i class="fas fa-video"></i> تفعيل الكاميرا
+                                </button>
+                            </div>
+                            
+                            <!-- Practice feedback -->
+                            <div id="practiceFeedback" class="mt-3" style="display: none;">
+                                <div class="alert alert-info">
+                                    <div id="feedbackContent">
+                                        <!-- Feedback will appear here -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Score display -->
+                            <div id="practiceScore" class="mt-3" style="display: none;">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6>النتيجة</h6>
+                                        <div class="d-flex justify-content-between">
+                                            <span>صحيح:</span>
+                                            <span id="correctCount">0</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>خطأ:</span>
+                                            <span id="incorrectCount">0</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between fw-bold">
+                                            <span>الدقة:</span>
+                                            <span id="accuracyPercent">0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Learning mode JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    // Letter card interactions
+    const letterCards = document.querySelectorAll('.letter-card');
+    const selectedLetter = document.getElementById('selectedLetter');
+    const letterDescription = document.getElementById('letterDescription');
+    
+    letterCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const letter = this.dataset.letter;
+            selectedLetter.textContent = letter;
+            letterDescription.textContent = `تعلم كيفية عمل إشارة حرف "${letter}"`;
+            
+            // Remove active class from all cards
+            letterCards.forEach(c => c.classList.remove('border-primary'));
+            // Add active class to clicked card
+            this.classList.add('border-primary');
+        });
+    });
+    
+    // Phrase card interactions
+    const phraseCards = document.querySelectorAll('.phrase-card');
+    const selectedPhrase = document.getElementById('selectedPhrase');
+    const phraseDescription = document.getElementById('phraseDescription');
+    
+    phraseCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const phrase = this.dataset.phrase;
+            selectedPhrase.textContent = phrase;
+            phraseDescription.textContent = `تعلم كيفية عمل إشارة "${phrase}"`;
+            
+            // Remove active class from all cards
+            phraseCards.forEach(c => c.classList.remove('border-success'));
+            // Add active class to clicked card
+            this.classList.add('border-success');
+        });
+    });
+    
+    // Practice mode functionality
+    let practiceMode = '';
+    let practiceItems = [];
+    let currentPracticeIndex = 0;
+    let practiceScore = { correct: 0, incorrect: 0 };
+    
+    document.getElementById('practiceLetters').addEventListener('click', function() {
+        practiceMode = 'letters';
+        practiceItems = {{ arabic_letters | tojson }};
+        startPracticeMode();
+    });
+    
+    document.getElementById('practicePhrases').addEventListener('click', function() {
+        practiceMode = 'phrases';
+        practiceItems = {{ common_phrases | tojson }};
+        startPracticeMode();
+    });
+    
+    function startPracticeMode() {
+        currentPracticeIndex = 0;
+        practiceScore = { correct: 0, incorrect: 0 };
+        
+        document.getElementById('practicePrompt').textContent = 
+            practiceMode === 'letters' ? 'تدريب على الأحرف العربية' : 'تدريب على العبارات الشائعة';
+        
+        document.getElementById('startPractice').style.display = 'inline-block';
+        showNextPracticeItem();
+    }
+    
+    function showNextPracticeItem() {
+        if (currentPracticeIndex < practiceItems.length) {
+            const item = practiceItems[currentPracticeIndex];
+            document.getElementById('practiceTarget').textContent = item;
+            document.getElementById('practiceInstructions').textContent = 
+                `اعمل إشارة "${item}" أمام الكاميرا`;
+        } else {
+            // Practice completed
+            showPracticeResults();
+        }
+    }
+    
+    function showPracticeResults() {
+        const total = practiceScore.correct + practiceScore.incorrect;
+        const accuracy = total > 0 ? Math.round((practiceScore.correct / total) * 100) : 0;
+        
+        document.getElementById('practiceTarget').textContent = 'انتهى التدريب!';
+        document.getElementById('practiceInstructions').textContent = 
+            `أحسنت! حصلت على ${practiceScore.correct} من ${total} (${accuracy}%)`;
+    }
+    
+    // Update practice score display
+    function updateScoreDisplay() {
+        document.getElementById('correctCount').textContent = practiceScore.correct;
+        document.getElementById('incorrectCount').textContent = practiceScore.incorrect;
+        const total = practiceScore.correct + practiceScore.incorrect;
+        const accuracy = total > 0 ? Math.round((practiceScore.correct / total) * 100) : 0;
+        document.getElementById('accuracyPercent').textContent = accuracy + '%';
+        document.getElementById('practiceScore').style.display = 'block';
+    }
+});
+</script>
+{% endblock %}

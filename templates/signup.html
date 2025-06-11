@@ -1,0 +1,533 @@
+{% extends "base.html" %}
+
+{% block title %}إنشاء حساب - مترجم لغة الإشارة العربية{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-success text-white text-center py-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>
+                        إنشاء حساب جديد
+                    </h3>
+                    <p class="mb-0 mt-2">انضم إلى مجتمع مترجم لغة الإشارة العربية</p>
+                </div>
+                <div class="card-body p-5">
+                    <form method="POST" id="signupForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="firstName" class="form-label">
+                                    <i class="fas fa-user me-2"></i>
+                                    الاسم الأول
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="firstName" 
+                                       name="first_name" 
+                                       placeholder="أدخل اسمك الأول"
+                                       autocomplete="given-name">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="lastName" class="form-label">
+                                    <i class="fas fa-user me-2"></i>
+                                    الاسم الأخير
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="lastName" 
+                                       name="last_name" 
+                                       placeholder="أدخل اسمك الأخير"
+                                       autocomplete="family-name">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope me-2"></i>
+                                البريد الإلكتروني *
+                            </label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   name="email" 
+                                   placeholder="أدخل بريدك الإلكتروني" 
+                                   required
+                                   autocomplete="email">
+                            <div class="form-text">سنرسل رسالة تأكيد إلى هذا البريد</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock me-2"></i>
+                                كلمة المرور *
+                            </label>
+                            <div class="input-group">
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="password" 
+                                       name="password" 
+                                       placeholder="أدخل كلمة مرور قوية" 
+                                       required
+                                       autocomplete="new-password"
+                                       minlength="8">
+                                <button class="btn btn-outline-secondary" 
+                                        type="button" 
+                                        onclick="togglePasswordVisibility('password', 'passwordIcon')">
+                                    <i class="fas fa-eye" id="passwordIcon"></i>
+                                </button>
+                            </div>
+                            <div class="password-requirements mt-2">
+                                <small class="text-muted">
+                                    يجب أن تحتوي كلمة المرور على الأقل على:
+                                </small>
+                                <ul class="list-unstyled mt-1">
+                                    <li><small id="length" class="text-danger">✗ 8 أحرف على الأقل</small></li>
+                                    <li><small id="uppercase" class="text-danger">✗ حرف كبير واحد</small></li>
+                                    <li><small id="lowercase" class="text-danger">✗ حرف صغير واحد</small></li>
+                                    <li><small id="number" class="text-danger">✗ رقم واحد</small></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">
+                                <i class="fas fa-lock me-2"></i>
+                                تأكيد كلمة المرور *
+                            </label>
+                            <div class="input-group">
+                                <input type="password" 
+                                       class="form-control" 
+                                       id="confirmPassword" 
+                                       name="confirm_password" 
+                                       placeholder="أعد إدخال كلمة المرور" 
+                                       required
+                                       autocomplete="new-password">
+                                <button class="btn btn-outline-secondary" 
+                                        type="button" 
+                                        onclick="togglePasswordVisibility('confirmPassword', 'confirmPasswordIcon')">
+                                    <i class="fas fa-eye" id="confirmPasswordIcon"></i>
+                                </button>
+                            </div>
+                            <div id="passwordMatch" class="form-text"></div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="userType" class="form-label">
+                                <i class="fas fa-user-tag me-2"></i>
+                                نوع المستخدم
+                            </label>
+                            <select class="form-control" id="userType" name="user_type">
+                                <option value="individual">فرد</option>
+                                <option value="student">طالب</option>
+                                <option value="teacher">معلم</option>
+                                <option value="parent">ولي أمر</option>
+                                <option value="researcher">باحث</option>
+                                <option value="organization">مؤسسة</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       id="agreeTerms" 
+                                       name="agree_terms" 
+                                       required>
+                                <label class="form-check-label" for="agreeTerms">
+                                    أوافق على 
+                                    <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#termsModal">
+                                        شروط الاستخدام
+                                    </a> 
+                                    و 
+                                    <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#privacyModal">
+                                        سياسة الخصوصية
+                                    </a> *
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       id="newsletter" 
+                                       name="newsletter">
+                                <label class="form-check-label" for="newsletter">
+                                    أرغب في استقبال النشرة الإخبارية والتحديثات
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                                <i class="fas fa-user-plus me-2"></i>
+                                إنشاء الحساب
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="mb-3">أو أنشئ حساب باستخدام:</p>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-outline-danger" onclick="signupWithGoogle()">
+                                <i class="fab fa-google me-2"></i>
+                                إنشاء حساب بجوجل
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="signupWithFacebook()">
+                                <i class="fab fa-facebook-f me-2"></i>
+                                إنشاء حساب بفيسبوك
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="mb-0">
+                            لديك حساب بالفعل؟ 
+                            <a href="{{ url_for('auth.login') }}" class="text-decoration-none fw-bold">
+                                تسجيل الدخول
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Benefits Section -->
+            <div class="card mt-4 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-star me-2"></i>
+                        مزايا إنشاء حساب
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    حفظ تقدمك في التعلم
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    الوصول لجميع الأوضاع
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    حفظ الجلسات والترجمات
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    تتبع الإحصائيات الشخصية
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    المساهمة في تحسين النموذج
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    الحصول على شهادات
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">شروط الاستخدام</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. قبول الشروط</h6>
+                <p>باستخدام هذه المنصة، فإنك توافق على الالتزام بهذه الشروط والأحكام.</p>
+                
+                <h6>2. استخدام الخدمة</h6>
+                <p>يحق لك استخدام هذه المنصة للأغراض التعليمية والشخصية المشروعة فقط.</p>
+                
+                <h6>3. الخصوصية والبيانات</h6>
+                <p>نحن ملتزمون بحماية خصوصيتك وبياناتك الشخصية وفقاً لسياسة الخصوصية الخاصة بنا.</p>
+                
+                <h6>4. المسؤولية</h6>
+                <p>أنت مسؤول عن المحتوى الذي تقوم بتحميله أو مشاركته على المنصة.</p>
+                
+                <h6>5. التعديل على الشروط</h6>
+                <p>نحتفظ بالحق في تعديل هذه الشروط في أي وقت مع إشعار مسبق.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Privacy Modal -->
+<div class="modal fade" id="privacyModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">سياسة الخصوصية</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>جمع البيانات</h6>
+                <p>نقوم بجمع البيانات الضرورية فقط لتوفير الخدمة وتحسين تجربة المستخدم.</p>
+                
+                <h6>استخدام البيانات</h6>
+                <p>نستخدم بياناتك لتوفير الخدمة، تحسين الأداء، وإرسال التحديثات المهمة.</p>
+                
+                <h6>مشاركة البيانات</h6>
+                <p>لا نشارك بياناتك الشخصية مع أطراف ثالثة دون موافقتك الصريحة.</p>
+                
+                <h6>أمان البيانات</h6>
+                <p>نستخدم أحدث تقنيات التشفير والأمان لحماية بياناتك.</p>
+                
+                <h6>حقوقك</h6>
+                <p>يحق لك الوصول إلى بياناتك، تعديلها، أو طلب حذفها في أي وقت.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-success mb-3" role="status">
+                    <span class="visually-hidden">جاري إنشاء الحساب...</span>
+                </div>
+                <h5>جاري إنشاء حسابك...</h5>
+                <p class="text-muted">يرجى الانتظار</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function togglePasswordVisibility(inputId, iconId) {
+    const passwordInput = document.getElementById(inputId);
+    const passwordIcon = document.getElementById(iconId);
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        passwordIcon.className = 'fas fa-eye-slash';
+    } else {
+        passwordInput.type = 'password';
+        passwordIcon.className = 'fas fa-eye';
+    }
+}
+
+function signupWithGoogle() {
+    alert('سيتم إعادة توجيهك لإنشاء حساب بجوجل...');
+}
+
+function signupWithFacebook() {
+    alert('سيتم إعادة توجيهك لإنشاء حساب بفيسبوك...');
+}
+
+// Password validation
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const submitBtn = document.getElementById('submitBtn');
+    const form = document.getElementById('signupForm');
+    
+    // Password strength checking
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        
+        // Check length
+        const lengthCheck = document.getElementById('length');
+        if (password.length >= 8) {
+            lengthCheck.className = 'text-success';
+            lengthCheck.textContent = '✓ 8 أحرف على الأقل';
+        } else {
+            lengthCheck.className = 'text-danger';
+            lengthCheck.textContent = '✗ 8 أحرف على الأقل';
+        }
+        
+        // Check uppercase
+        const uppercaseCheck = document.getElementById('uppercase');
+        if (/[A-Z]/.test(password)) {
+            uppercaseCheck.className = 'text-success';
+            uppercaseCheck.textContent = '✓ حرف كبير واحد';
+        } else {
+            uppercaseCheck.className = 'text-danger';
+            uppercaseCheck.textContent = '✗ حرف كبير واحد';
+        }
+        
+        // Check lowercase
+        const lowercaseCheck = document.getElementById('lowercase');
+        if (/[a-z]/.test(password)) {
+            lowercaseCheck.className = 'text-success';
+            lowercaseCheck.textContent = '✓ حرف صغير واحد';
+        } else {
+            lowercaseCheck.className = 'text-danger';
+            lowercaseCheck.textContent = '✗ حرف صغير واحد';
+        }
+        
+        // Check number
+        const numberCheck = document.getElementById('number');
+        if (/[0-9]/.test(password)) {
+            numberCheck.className = 'text-success';
+            numberCheck.textContent = '✓ رقم واحد';
+        } else {
+            numberCheck.className = 'text-danger';
+            numberCheck.textContent = '✗ رقم واحد';
+        }
+        
+        checkPasswordMatch();
+    });
+    
+    // Password confirmation checking
+    confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+    
+    function checkPasswordMatch() {
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        const matchDiv = document.getElementById('passwordMatch');
+        
+        if (confirmPassword === '') {
+            matchDiv.textContent = '';
+            return;
+        }
+        
+        if (password === confirmPassword) {
+            matchDiv.className = 'form-text text-success';
+            matchDiv.textContent = '✓ كلمات المرور متطابقة';
+        } else {
+            matchDiv.className = 'form-text text-danger';
+            matchDiv.textContent = '✗ كلمات المرور غير متطابقة';
+        }
+    }
+    
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        const email = document.getElementById('email').value;
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+        const agreeTerms = document.getElementById('agreeTerms').checked;
+        
+        // Basic validation
+        if (!email || !password || !confirmPassword) {
+            e.preventDefault();
+            alert('يرجى ملء جميع الحقول المطلوبة');
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            alert('كلمات المرور غير متطابقة');
+            return;
+        }
+        
+        if (!agreeTerms) {
+            e.preventDefault();
+            alert('يجب الموافقة على شروط الاستخدام');
+            return;
+        }
+        
+        // Password strength validation
+        if (password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+            e.preventDefault();
+            alert('كلمة المرور لا تلبي متطلبات الأمان');
+            return;
+        }
+        
+        // Show loading modal
+        const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+        loadingModal.show();
+    });
+    
+    // Email validation
+    const emailInput = document.getElementById('email');
+    emailInput.addEventListener('blur', function() {
+        const email = this.value;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        if (email && !emailRegex.test(email)) {
+            this.classList.add('is-invalid');
+        } else {
+            this.classList.remove('is-invalid');
+        }
+    });
+});
+
+// Add smooth animations
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('.form-control');
+    
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            if (!this.value) {
+                this.parentElement.classList.remove('focused');
+            }
+        });
+    });
+});
+</script>
+
+<style>
+.password-requirements ul {
+    font-size: 0.875rem;
+}
+
+.focused .form-label {
+    color: #198754;
+    font-weight: 600;
+}
+
+.form-control:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545;
+}
+
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.modal-content {
+    border-radius: 10px;
+}
+
+.form-check-input:checked {
+    background-color: #198754;
+    border-color: #198754;
+}
+</style>
+{% endblock %}

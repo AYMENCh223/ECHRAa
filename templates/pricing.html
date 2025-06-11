@@ -1,0 +1,542 @@
+{% extends "base.html" %}
+
+{% block title %}الأسعار والباقات - مترجم لغة الإشارة العربية{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 mb-3">خطط الأسعار والخدمات</h1>
+            <p class="lead">اختر الباقة المناسبة لاحتياجاتك من خدمات ترجمة لغة الإشارة العربية</p>
+        </div>
+    </div>
+
+    <!-- Subscription Plans -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-credit-card"></i> باقات الاشتراك الشهري
+            </h2>
+        </div>
+        {% for plan_id, plan in subscription_plans.items() %}
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 {% if plan_id == 'premium' %}border-primary{% endif %} position-relative">
+                {% if plan_id == 'premium' %}
+                <div class="badge bg-primary position-absolute top-0 start-50 translate-middle px-3 py-2">
+                    الأكثر شعبية
+                </div>
+                {% endif %}
+                
+                <div class="card-header text-center {% if plan_id == 'premium' %}bg-primary text-white{% else %}bg-light{% endif %}">
+                    <h4 class="card-title">{{ plan.name }}</h4>
+                    <div class="price-display">
+                        <span class="h2">${{ "%.2f"|format(plan.price) }}</span>
+                        <span class="text-muted">/ {{ plan.duration }}</span>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        {% for feature in plan.features %}
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            {{ feature }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                
+                <div class="card-footer text-center">
+                    <form method="POST" action="{{ url_for('create_checkout_session', plan_type='subscription', item_id=plan_id) }}">
+                        <button type="submit" class="btn {% if plan_id == 'premium' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-lg w-100">
+                            اختيار هذه الباقة
+                        </button>
+                    </form>
+                    <small class="text-muted d-block mt-2">يمكن إلغاء الاشتراك في أي وقت</small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Training Courses -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-graduation-cap"></i> الدورات التدريبية
+            </h2>
+            <p class="text-center text-muted mb-4">دورات تدريبية متخصصة لتعلم وإتقان لغة الإشارة العربية</p>
+        </div>
+        
+        {% for course in training_courses %}
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="card-title">{{ course.title }}</h5>
+                            <span class="badge 
+                                {% if course.level == 'مبتدئ' %}bg-success
+                                {% elif course.level == 'متوسط' %}bg-warning
+                                {% elif course.level == 'متقدم' %}bg-danger
+                                {% else %}bg-info
+                                {% endif %}">
+                                {{ course.level }}
+                            </span>
+                        </div>
+                        <div class="text-end">
+                            <span class="h4 text-primary">${{ "%.2f"|format(course.price) }}</span>
+                        </div>
+                    </div>
+                    
+                    <p class="card-text">{{ course.description }}</p>
+                    
+                    <div class="course-details mb-3">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i> {{ course.duration }}
+                            <span class="ms-3">
+                                <i class="fas fa-users me-1"></i> مجموعات صغيرة
+                            </span>
+                        </small>
+                    </div>
+                    
+                    <div class="course-features mb-3">
+                        <small class="d-block"><i class="fas fa-check text-success me-1"></i> شهادة معتمدة</small>
+                        <small class="d-block"><i class="fas fa-check text-success me-1"></i> دعم مدرب متخصص</small>
+                        <small class="d-block"><i class="fas fa-check text-success me-1"></i> مواد تدريبية شاملة</small>
+                        <small class="d-block"><i class="fas fa-check text-success me-1"></i> تدريب عملي</small>
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <form method="POST" action="{{ url_for('create_checkout_session', plan_type='course', item_id=course.id) }}">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            اشتراك في الدورة
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Enterprise Solutions -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-building"></i> الحلول المؤسسية
+            </h2>
+            <p class="text-center text-muted mb-4">حلول متكاملة للمؤسسات التعليمية والصحية والحكومية</p>
+        </div>
+        
+        {% for solution in enterprise_solutions %}
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">{{ solution.name }}</h5>
+                    <small>{{ solution.target }}</small>
+                </div>
+                
+                <div class="card-body">
+                    <p class="card-text">{{ solution.description }}</p>
+                    
+                    <h6 class="mb-3">المزايا المتضمنة:</h6>
+                    <ul class="list-unstyled">
+                        {% for feature in solution.features %}
+                        <li class="mb-2">
+                            <i class="fas fa-star text-warning me-2"></i>
+                            {{ feature }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <div class="price-info mt-3">
+                        <h6 class="text-primary">{{ solution.price_range }}</h6>
+                        {% if solution.custom_pricing %}
+                        <small class="text-muted">أسعار مخصصة حسب الحجم والمتطلبات</small>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <button class="btn btn-info w-100" onclick="contactEnterprise('{{ solution.id }}')">
+                        <i class="fas fa-phone me-2"></i>
+                        طلب عرض سعر مخصص
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Features Comparison -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">مقارنة الباقات</h2>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>الميزة</th>
+                            <th class="text-center">الأساسية</th>
+                            <th class="text-center">المتميزة</th>
+                            <th class="text-center">التعليمية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>ترجمة غير محدودة</td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>حفظ الجلسات</td>
+                            <td class="text-center">10 جلسات</td>
+                            <td class="text-center">غير محدود</td>
+                            <td class="text-center">غير محدود</td>
+                        </tr>
+                        <tr>
+                            <td>تصدير PDF</td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>دعم فني مخصص</td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>أدوات تعليمية إضافية</td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>استخدام مؤسسي</td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center">50 مستخدم</td>
+                        </tr>
+                        <tr>
+                            <td>إحصائيات متقدمة</td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                        <tr>
+                            <td>دورات تدريبية</td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-times text-danger"></i></td>
+                            <td class="text-center"><i class="fas fa-check text-success"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">الأسئلة الشائعة</h2>
+        </div>
+        <div class="col-lg-8 mx-auto">
+            <div class="accordion" id="pricingFAQ">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                            هل يمكنني إلغاء الاشتراك في أي وقت؟
+                        </button>
+                    </h2>
+                    <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#pricingFAQ">
+                        <div class="accordion-body">
+                            نعم، يمكنك إلغاء اشتراكك في أي وقت. سيستمر اشتراكك حتى نهاية الفترة المدفوعة ولن يتم تجديده تلقائياً.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                            هل تتوفر فترة تجريبية مجانية؟
+                        </button>
+                    </h2>
+                    <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#pricingFAQ">
+                        <div class="accordion-body">
+                            نعم، نوفر فترة تجريبية مجانية لمدة 7 أيام لجميع الباقات المدفوعة. يمكنك تجربة جميع المزايا بدون أي التزام.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                            هل تتوفر خصومات للمؤسسات التعليمية؟
+                        </button>
+                    </h2>
+                    <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#pricingFAQ">
+                        <div class="accordion-body">
+                            نعم، نوفر خصومات خاصة للمؤسسات التعليمية والمنظمات غير الربحية. يرجى التواصل معنا للحصول على عرض سعر مخصص.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                            ما طرق الدفع المقبولة؟
+                        </button>
+                    </h2>
+                    <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#pricingFAQ">
+                        <div class="accordion-body">
+                            نقبل جميع البطاقات الائتمانية الرئيسية (Visa, MasterCard, American Express) والمحافظ الرقمية مثل PayPal.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                            هل بياناتي محمية وآمنة؟
+                        </button>
+                    </h2>
+                    <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#pricingFAQ">
+                        <div class="accordion-body">
+                            نعم، نستخدم أعلى معايير الأمان لحماية بياناتك. جميع البيانات مشفرة ومحمية وفقاً لمعايير GDPR العالمية.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center py-5">
+                    <h3 class="mb-4">لديك أسئلة أو تحتاج مساعدة؟</h3>
+                    <p class="lead">فريق الدعم الفني متاح لمساعدتك في اختيار الباقة المناسبة</p>
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                                <button class="btn btn-light btn-lg" onclick="contactSupport()">
+                                    <i class="fas fa-envelope me-2"></i>
+                                    راسلنا
+                                </button>
+                                <button class="btn btn-outline-light btn-lg" onclick="scheduleCall()">
+                                    <i class="fas fa-phone me-2"></i>
+                                    حجز مكالمة
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enterprise Contact Modal -->
+<div class="modal fade" id="enterpriseModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">طلب عرض سعر مخصص للمؤسسات</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="enterpriseForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="companyName" class="form-label">اسم المؤسسة</label>
+                            <input type="text" class="form-control" id="companyName" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="contactName" class="form-label">اسم المسؤول</label>
+                            <input type="text" class="form-control" id="contactName" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="contactEmail" class="form-label">البريد الإلكتروني</label>
+                            <input type="email" class="form-control" id="contactEmail" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="contactPhone" class="form-label">رقم الهاتف</label>
+                            <input type="tel" class="form-control" id="contactPhone" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="organizationType" class="form-label">نوع المؤسسة</label>
+                            <select class="form-control" id="organizationType" required>
+                                <option value="">اختر نوع المؤسسة</option>
+                                <option value="education">تعليمية</option>
+                                <option value="healthcare">صحية</option>
+                                <option value="government">حكومية</option>
+                                <option value="nonprofit">غير ربحية</option>
+                                <option value="private">خاصة</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="expectedUsers" class="form-label">العدد المتوقع للمستخدمين</label>
+                            <select class="form-control" id="expectedUsers" required>
+                                <option value="">اختر العدد</option>
+                                <option value="10-50">10-50 مستخدم</option>
+                                <option value="51-100">51-100 مستخدم</option>
+                                <option value="101-500">101-500 مستخدم</option>
+                                <option value="500+">أكثر من 500 مستخدم</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="requirements" class="form-label">متطلبات خاصة أو ملاحظات</label>
+                        <textarea class="form-control" id="requirements" rows="4" placeholder="اذكر أي متطلبات خاصة أو تكاملات مطلوبة..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="timeline" class="form-label">الجدول الزمني المطلوب للتنفيذ</label>
+                        <select class="form-control" id="timeline">
+                            <option value="">اختر الجدول الزمني</option>
+                            <option value="immediate">فوري (خلال أسبوع)</option>
+                            <option value="1month">خلال شهر</option>
+                            <option value="3months">خلال 3 أشهر</option>
+                            <option value="6months">خلال 6 أشهر</option>
+                            <option value="flexible">مرن</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="submitEnterpriseRequest()">
+                    إرسال الطلب
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function contactEnterprise(solutionId) {
+    // Store the selected solution ID
+    document.getElementById('enterpriseModal').dataset.solutionId = solutionId;
+    
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('enterpriseModal'));
+    modal.show();
+}
+
+function submitEnterpriseRequest() {
+    const form = document.getElementById('enterpriseForm');
+    const formData = new FormData(form);
+    
+    // Basic validation
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    // Collect form data
+    const requestData = {
+        solutionId: document.getElementById('enterpriseModal').dataset.solutionId,
+        companyName: document.getElementById('companyName').value,
+        contactName: document.getElementById('contactName').value,
+        contactEmail: document.getElementById('contactEmail').value,
+        contactPhone: document.getElementById('contactPhone').value,
+        organizationType: document.getElementById('organizationType').value,
+        expectedUsers: document.getElementById('expectedUsers').value,
+        requirements: document.getElementById('requirements').value,
+        timeline: document.getElementById('timeline').value,
+        submittedAt: new Date().toISOString()
+    };
+    
+    // Simulate sending the request (in real app, this would be an API call)
+    console.log('Enterprise request submitted:', requestData);
+    
+    // Show success message
+    alert('تم إرسال طلبك بنجاح! سيتواصل معك فريقنا خلال 24 ساعة.');
+    
+    // Close modal and reset form
+    const modal = bootstrap.Modal.getInstance(document.getElementById('enterpriseModal'));
+    modal.hide();
+    form.reset();
+}
+
+function contactSupport() {
+    // Open email client or show contact form
+    window.location.href = 'mailto:support@arabicsignlang.com?subject=استفسار عن الأسعار والباقات';
+}
+
+function scheduleCall() {
+    // In a real app, this would integrate with a scheduling system
+    alert('سيتم توجيهك لنظام حجز المواعيد...');
+    // Example: window.open('https://calendly.com/arabicsignlang/consultation');
+}
+
+// Add smooth scrolling to pricing sections
+document.addEventListener('DOMContentLoaded', function() {
+    // Highlight recommended plan
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        if (card.querySelector('.badge') && card.querySelector('.badge').textContent.includes('شعبية')) {
+            card.style.transform = 'scale(1.05)';
+            card.style.boxShadow = '0 10px 30px rgba(0,123,255,0.3)';
+        }
+    });
+    
+    // Add pricing animation on scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animation = 'fadeInUp 0.6s ease forwards';
+            }
+        });
+    });
+    
+    document.querySelectorAll('.card').forEach(card => {
+        observer.observe(card);
+    });
+});
+
+// Add CSS animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .price-display {
+        margin: 1rem 0;
+    }
+    
+    .course-features small {
+        line-height: 1.6;
+    }
+    
+    .table th {
+        border-top: none;
+    }
+    
+    .accordion-button:not(.collapsed) {
+        background-color: rgba(0,123,255,0.1);
+        border-color: rgba(0,123,255,0.2);
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

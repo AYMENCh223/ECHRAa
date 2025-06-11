@@ -1,0 +1,470 @@
+{% extends "base.html" %}
+
+{% block title %}نجح الدفع - مترجم لغة الإشارة العربية{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            {% if session %}
+            <!-- Success Message -->
+            <div class="card border-success shadow-lg">
+                <div class="card-header bg-success text-white text-center py-4">
+                    <div class="success-icon mb-3">
+                        <i class="fas fa-check-circle fa-4x"></i>
+                    </div>
+                    <h2 class="mb-0">تم الدفع بنجاح!</h2>
+                    <p class="mb-0 mt-2">شكراً لك على اشتراكك في منصتنا</p>
+                </div>
+                
+                <div class="card-body p-5">
+                    <!-- Payment Details -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="text-success mb-3">
+                                <i class="fas fa-receipt me-2"></i>
+                                تفاصيل الدفع
+                            </h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <strong>رقم الجلسة:</strong> 
+                                    <code>{{ session.id }}</code>
+                                </li>
+                                <li class="mb-2">
+                                    <strong>المبلغ المدفوع:</strong> 
+                                    ${{ "%.2f"|format(session.amount_total / 100) }}
+                                </li>
+                                <li class="mb-2">
+                                    <strong>العملة:</strong> 
+                                    {{ session.currency.upper() }}
+                                </li>
+                                <li class="mb-2">
+                                    <strong>حالة الدفع:</strong> 
+                                    <span class="badge bg-success">{{ session.payment_status }}</span>
+                                </li>
+                                <li class="mb-2">
+                                    <strong>طريقة الدفع:</strong> 
+                                    {{ session.payment_method_types[0] if session.payment_method_types else 'بطاقة ائتمانية' }}
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-box me-2"></i>
+                                تفاصيل الباقة
+                            </h5>
+                            {% if session.line_items and session.line_items.data %}
+                                {% for item in session.line_items.data %}
+                                <div class="purchased-item mb-3">
+                                    <h6>{{ item.description }}</h6>
+                                    <p class="text-muted mb-1">الكمية: {{ item.quantity }}</p>
+                                    <p class="text-muted">السعر: ${{ "%.2f"|format(item.amount_total / 100) }}</p>
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Next Steps -->
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-info-circle me-2"></i>
+                            الخطوات التالية
+                        </h6>
+                        <ul class="mb-0">
+                            <li>تم تفعيل اشتراكك تلقائياً</li>
+                            <li>ستصلك رسالة تأكيد على بريدك الإلكتروني</li>
+                            <li>يمكنك الآن الوصول لجميع مزايا الباقة</li>
+                            <li>سيتم تجديد اشتراكك تلقائياً في نفس التاريخ من الشهر القادم</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="text-center">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg me-3">
+                            <i class="fas fa-home me-2"></i>
+                            العودة للرئيسية
+                        </a>
+                        <button class="btn btn-outline-success btn-lg" onclick="downloadReceipt()">
+                            <i class="fas fa-download me-2"></i>
+                            تحميل الفاتورة
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Features Unlocked -->
+            <div class="card mt-4 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-unlock me-2"></i>
+                        المزايا المفعلة لك الآن
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    ترجمة غير محدودة للإشارات
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    حفظ جلسات التدريب
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    تصدير النتائج بصيغة PDF
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    الوصول لجميع الأوضاع
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    دعم فني مخصص
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    تحديثات مجانية
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    إحصائيات متقدمة
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    أولوية في الدعم
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% else %}
+            <!-- Error Message -->
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark text-center py-4">
+                    <div class="warning-icon mb-3">
+                        <i class="fas fa-exclamation-triangle fa-4x"></i>
+                    </div>
+                    <h2 class="mb-0">لم يتم العثور على معلومات الدفع</h2>
+                </div>
+                
+                <div class="card-body p-5 text-center">
+                    <p class="lead mb-4">
+                        لم نتمكن من تأكيد عملية الدفع. إذا تم خصم المبلغ من حسابك، 
+                        يرجى التواصل مع الدعم الفني.
+                    </p>
+                    
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">ماذا يمكنك فعله؟</h6>
+                        <ul class="mb-0 text-start">
+                            <li>تحقق من بريدك الإلكتروني للحصول على تأكيد الدفع</li>
+                            <li>راجع كشف حسابك البنكي</li>
+                            <li>تواصل مع الدعم الفني إذا كان لديك أي استفسارات</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg me-3">
+                            <i class="fas fa-home me-2"></i>
+                            العودة للرئيسية
+                        </a>
+                        <a href="{{ url_for('pricing') }}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-credit-card me-2"></i>
+                            مراجعة الباقات
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Support Section -->
+            <div class="card mt-4 bg-light">
+                <div class="card-body text-center py-4">
+                    <h5 class="mb-3">هل تحتاج مساعدة؟</h5>
+                    <p class="text-muted mb-3">
+                        فريق الدعم الفني متاح لمساعدتك في أي استفسارات
+                    </p>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <button class="btn btn-outline-primary" onclick="contactSupport()">
+                            <i class="fas fa-envelope me-2"></i>
+                            راسل الدعم الفني
+                        </button>
+                        <button class="btn btn-outline-success" onclick="openChat()">
+                            <i class="fas fa-comments me-2"></i>
+                            الدردشة المباشرة
+                        </button>
+                        <button class="btn btn-outline-info" onclick="callSupport()">
+                            <i class="fas fa-phone me-2"></i>
+                            اتصل بنا
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Start Guide -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-rocket me-2"></i>
+                        دليل البدء السريع
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="step-icon mb-3">
+                                <i class="fas fa-video fa-3x text-primary"></i>
+                            </div>
+                            <h6>1. فعل الكاميرا</h6>
+                            <p class="text-muted">ابدأ بتفعيل الكاميرا لبدء ترجمة الإشارات</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="step-icon mb-3">
+                                <i class="fas fa-hands fa-3x text-success"></i>
+                            </div>
+                            <h6>2. اعمل الإشارات</h6>
+                            <p class="text-muted">اعمل إشارات لغة الإشارة العربية أمام الكاميرا</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="step-icon mb-3">
+                                <i class="fas fa-language fa-3x text-info"></i>
+                            </div>
+                            <h6>3. احصل على الترجمة</h6>
+                            <p class="text-muted">شاهد الترجمة الفورية واستمع للنطق</p>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('learn') }}" class="btn btn-success">
+                            <i class="fas fa-graduation-cap me-2"></i>
+                            ابدأ التعلم الآن
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Receipt Modal -->
+<div class="modal fade" id="receiptModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">فاتورة الدفع</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="receiptContent">
+                    <!-- Receipt content will be generated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-primary" onclick="printReceipt()">
+                    <i class="fas fa-print me-2"></i>
+                    طباعة
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function downloadReceipt() {
+    {% if session %}
+    // Generate receipt content
+    const receiptContent = `
+        <div class="receipt-header text-center mb-4">
+            <h3>مترجم لغة الإشارة العربية</h3>
+            <p>فاتورة دفع رقم: {{ session.id }}</p>
+            <p>التاريخ: ${new Date().toLocaleDateString('ar-SA')}</p>
+        </div>
+        
+        <div class="receipt-details">
+            <table class="table">
+                <tr>
+                    <td><strong>رقم الجلسة:</strong></td>
+                    <td>{{ session.id }}</td>
+                </tr>
+                <tr>
+                    <td><strong>المبلغ:</strong></td>
+                    <td>${{ "%.2f"|format(session.amount_total / 100) }}</td>
+                </tr>
+                <tr>
+                    <td><strong>العملة:</strong></td>
+                    <td>{{ session.currency.upper() }}</td>
+                </tr>
+                <tr>
+                    <td><strong>حالة الدفع:</strong></td>
+                    <td>{{ session.payment_status }}</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="receipt-footer mt-4">
+            <p class="text-center text-muted">شكراً لك على استخدام خدماتنا</p>
+        </div>
+    `;
+    
+    document.getElementById('receiptContent').innerHTML = receiptContent;
+    const modal = new bootstrap.Modal(document.getElementById('receiptModal'));
+    modal.show();
+    {% else %}
+    alert('لا توجد معلومات فاتورة متاحة');
+    {% endif %}
+}
+
+function printReceipt() {
+    const receiptContent = document.getElementById('receiptContent').innerHTML;
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <title>فاتورة الدفع</title>
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; }
+                    .table { width: 100%; border-collapse: collapse; }
+                    .table td { padding: 8px; border-bottom: 1px solid #ddd; }
+                    .text-center { text-align: center; }
+                    .text-muted { color: #666; }
+                </style>
+            </head>
+            <body>
+                ${receiptContent}
+            </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+}
+
+function contactSupport() {
+    window.location.href = 'mailto:support@arabicsignlang.com?subject=استفسار بخصوص الدفع&body=رقم الجلسة: {% if session %}{{ session.id }}{% endif %}';
+}
+
+function openChat() {
+    // In a real implementation, this would open a chat widget
+    alert('سيتم فتح نافذة الدردشة المباشرة...');
+}
+
+function callSupport() {
+    alert('رقم الدعم الفني: +966 11 123 4567');
+}
+
+// Add celebration animation
+document.addEventListener('DOMContentLoaded', function() {
+    {% if session %}
+    // Add confetti effect for successful payment
+    const successIcon = document.querySelector('.success-icon i');
+    if (successIcon) {
+        successIcon.style.animation = 'pulse 2s infinite';
+    }
+    
+    // Auto-scroll to top
+    window.scrollTo(0, 0);
+    
+    // Show success message
+    setTimeout(() => {
+        if (typeof bootstrap !== 'undefined') {
+            const toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-white bg-success border-0';
+            toast.style.position = 'fixed';
+            toast.style.top = '20px';
+            toast.style.right = '20px';
+            toast.style.zIndex = '1050';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        تم تفعيل اشتراكك بنجاح! مرحباً بك في العضوية المميزة
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            const bsToast = new bootstrap.Toast(toast, { delay: 5000 });
+            bsToast.show();
+            
+            toast.addEventListener('hidden.bs.toast', () => {
+                document.body.removeChild(toast);
+            });
+        }
+    }, 1000);
+    {% endif %}
+});
+</script>
+
+<style>
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.success-icon i {
+    animation: pulse 2s infinite;
+}
+
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.step-icon i {
+    transition: all 0.3s ease;
+}
+
+.step-icon:hover i {
+    transform: scale(1.1);
+    color: #0d6efd !important;
+}
+
+.purchased-item {
+    border-left: 3px solid #0d6efd;
+    padding-left: 15px;
+}
+
+.receipt-header {
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 20px;
+}
+
+.receipt-footer {
+    border-top: 2px solid #dee2e6;
+    padding-top: 20px;
+}
+
+.btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.alert {
+    border-left: 4px solid;
+}
+
+.alert-info {
+    border-left-color: #0dcaf0;
+}
+
+.warning-icon i,
+.success-icon i {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}

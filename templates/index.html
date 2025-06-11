@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}الرئيسية - مترجم لغة الإشارة العربية{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-lg-12 text-center">
+            <h1 class="display-4 mb-4">مترجم لغة الإشارة العربية</h1>
+            <p class="lead mb-4">ترجمة فورية ودقيقة للغة الإشارة العربية باستخدام تقنيات الذكاء الاصطناعي المتقدمة</p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <button id="startCamera" class="btn btn-primary btn-lg">
+                    <i class="fas fa-video"></i> تشغيل الكاميرا
+                </button>
+                <button id="stopCamera" class="btn btn-secondary btn-lg" disabled>
+                    <i class="fas fa-video-slash"></i> إيقاف الكاميرا
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Translation Interface -->
+    <div class="row">
+        <!-- Video Feed -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-camera"></i> إدخال الإشارات
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div id="videoContainer" class="video-container">
+                        <img id="videoFeed" src="" alt="إدخال الفيديو" class="img-fluid rounded" style="display: none; max-height: 400px;">
+                        <div id="videoPlaceholder" class="placeholder-content">
+                            <i class="fas fa-camera fa-5x mb-3 text-muted"></i>
+                            <p class="text-muted">اضغط على "تشغيل الكاميرا" لبدء الترجمة</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Prediction Display -->
+                    <div id="predictionDisplay" class="mt-3" style="display: none;">
+                        <div class="alert alert-info">
+                            <strong>الإشارة المكتشفة:</strong> 
+                            <span id="currentPrediction">-</span>
+                            <br>
+                            <strong>مستوى الثقة:</strong> 
+                            <span id="confidenceLevel">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Translation Results -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-language"></i> الترجمة
+                    </h5>
+                    <button id="clearTranslation" class="btn btn-sm btn-outline-danger">
+                        <i class="fas fa-trash"></i> مسح
+                    </button>
+                </div>
+                <div class="card-body">
+                    <!-- Current Sentence -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الجملة الحالية:</label>
+                        <div id="currentSentence" class="form-control bg-light" style="min-height: 80px; direction: rtl;">
+                            <!-- Current translation will appear here -->
+                        </div>
+                    </div>
+
+                    <!-- Recognized Signs -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">الإشارات المكتشفة:</label>
+                        <div id="recognizedSigns" class="border rounded p-2 bg-light" style="min-height: 100px;">
+                            <div class="d-flex flex-wrap gap-1" id="signsContainer">
+                                <!-- Individual signs will appear here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2">
+                        <button id="speakTranslation" class="btn btn-success" disabled>
+                            <i class="fas fa-volume-up"></i> تشغيل الصوت
+                        </button>
+                        <button id="saveSession" class="btn btn-info" disabled>
+                            <i class="fas fa-save"></i> حفظ الجلسة
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">مزايا المنصة</h2>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-bolt fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">ترجمة فورية</h5>
+                    <p class="card-text">ترجمة الإشارات إلى نصوص وكلام بشكل فوري ودقيق</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-brain fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">ذكاء اصطناعي متقدم</h5>
+                    <p class="card-text">استخدام تقنيات التعلم العميق لضمان أعلى دقة في الترجمة</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-users fa-3x text-info mb-3"></i>
+                    <h5 class="card-title">أوضاع متعددة</h5>
+                    <p class="card-text">أوضاع مخصصة للتعلم والتدريس والاستخدام مع الأطفال</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="text-center mb-4">وصول سريع</h3>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('learn') }}" class="btn btn-outline-primary btn-lg w-100">
+                <i class="fas fa-graduation-cap"></i><br>
+                وضع التعلم
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('teacher_mode') }}" class="btn btn-outline-success btn-lg w-100">
+                <i class="fas fa-chalkboard-teacher"></i><br>
+                وضع المعلم
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('kids_mode') }}" class="btn btn-outline-warning btn-lg w-100">
+                <i class="fas fa-child"></i><br>
+                وضع الأطفال
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('dataset_collection') }}" class="btn btn-outline-info btn-lg w-100">
+                <i class="fas fa-database"></i><br>
+                جمع البيانات
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Session Save Modal -->
+<div class="modal fade" id="saveSessionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">حفظ الجلسة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="sessionName" class="form-label">اسم الجلسة:</label>
+                    <input type="text" class="form-control" id="sessionName" placeholder="أدخل اسم الجلسة">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" id="confirmSaveSession">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+<script src="{{ url_for('static', filename='js/gesture_recognition.js') }}"></script>
+{% endblock %}
