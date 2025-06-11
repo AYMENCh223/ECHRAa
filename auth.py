@@ -63,6 +63,27 @@ def signup():
             return redirect(url_for('auth.login'))
     return render_template('signup.html')
 
+@auth_bp.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        if SUPABASE_AUTH_URL and SUPABASE_ANON_KEY:
+            headers = {
+                'apikey': SUPABASE_ANON_KEY,
+                'Content-Type': 'application/json'
+            }
+            data = {'email': email}
+            response = requests.post(f"{SUPABASE_AUTH_URL}/recover", json=data, headers=headers)
+            if response.status_code == 200:
+                flash('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.', 'success')
+            else:
+                flash('حدث خطأ. يرجى المحاولة مرة أخرى.', 'error')
+        else:
+            # Mock forgot password for development
+            flash('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني (وضع التطوير).', 'success')
+        return redirect(url_for('auth.login'))
+    return render_template('forgot_password.html')
+
 @auth_bp.route('/logout')
 def logout():
     session.pop('user', None)

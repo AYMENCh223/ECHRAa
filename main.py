@@ -103,6 +103,17 @@ model_loaded = True
 
 # Initialize TTS with error handling to prevent startup crashes
 try:
+    import pyttsx3
+    tts_engine = pyttsx3.init()
+    class TextToSpeech:
+        def __init__(self):
+            self.engine = tts_engine
+        def speak(self, text):
+            self.engine.say(text)
+            self.engine.runAndWait()
+        def speak_async(self, text):
+            self.engine.say(text)
+            self.engine.runAndWait()
     tts = TextToSpeech()
 except Exception as e:
     logger.error(f"TTS initialization failed: {str(e)}")
