@@ -43,12 +43,17 @@ class CameraManager {
      */
     async initialize() {
         try {
+            // Check if getUserMedia is supported
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error('متصفحك لا يدعم الوصول للكاميرا');
+            }
+            
             await this.enumerateDevices();
             this.setupEventListeners();
             console.log('Camera manager initialized successfully');
         } catch (error) {
             console.error('Failed to initialize camera manager:', error);
-            this.handleError('فشل في تهيئة مدير الكاميرا', error);
+            this.handleError('فشل في تهيئة الكاميرا', error);
         }
     }
     

@@ -5,7 +5,7 @@ channel = "stable-24_05"
 packages = ["SDL2", "SDL2_image", "SDL2_mixer", "SDL2_ttf", "espeak-ng", "fontconfig", "freetype", "lcms2", "libGL", "libGLU", "libimagequant", "libjpeg", "libpng", "libtiff", "libwebp", "libxcrypt", "openjpeg", "pkg-config", "portmidi", "tcl", "tk", "zlib"]
 
 [workflows]
-runButton = "Project"
+runButton = "Start application"
 
 [[workflows.workflow]]
 name = "Project"

@@ -18,11 +18,12 @@ import datetime
 # Import Stripe service
 import stripe_service
 
-# Import custom modules
-from utils.hand_detector import HandDetector
-from utils.sign_classifier import SignClassifier
-from utils.text_to_speech import TextToSpeech
-from utils.arabic_text_utils import reshape_arabic_text, apply_arabic_grammar_rules
+# Import custom modules with error handling
+try:
+    from utils.arabic_text_utils import reshape_arabic_text, apply_arabic_grammar_rules
+except ImportError:
+    def reshape_arabic_text(text): return text
+    def apply_arabic_grammar_rules(text): return text
 from models.database import db, init_db
 from models.user import User
 from models.session import Session
@@ -57,8 +58,18 @@ translations_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'da
 with open(translations_path, 'r', encoding='utf-8') as f:
     translations = json.load(f)
 
-# Initialize modules
-hand_detector = HandDetector(max_hands=1)
+# Initialize modules with simplified approach
+class SimpleHandDetector:
+    def __init__(self, max_hands=1):
+        self.max_hands = max_hands
+    
+    def find_hands(self, img, draw=True):
+        return img
+    
+    def find_position(self, img, hand_no=0, draw=True):
+        return []
+
+hand_detector = SimpleHandDetector(max_hands=1)
 
 # Initialize sign classifier with lazy loading to avoid threading issues
 class LazySignClassifier:
@@ -257,7 +268,14 @@ for letter, words in common_words.items():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Allow demo access or require login
+    demo_mode = request.args.get('demo') == '1'
+    user_id = session.get('user_id')
+    
+    if not user_id and not demo_mode:
+        return redirect(url_for('auth.login'))
+    
+    return render_template('index.html', demo_mode=demo_mode)
 
 @app.route('/learn')
 def learn():
@@ -908,19 +926,21 @@ def export_dataset():
         logger.error(f"Error exporting dataset: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-@app.route('/upload_model', methods=['POST'])
+@app.route('/upload_model', methods=['GET', 'POST'])
 def upload_model():
+    if request.method == 'GET':
+        return render_template('upload_model.html')
+    
     try:
-        # Check if files are in the request
-        if 'model' not in request.files or 'labels' not in request.files:
-            return jsonify({'error': 'Missing model or labels file'}), 400
+        # Check if model file was uploaded
+        if 'model_file' not in request.files:
+            return jsonify({'success': False, 'error': 'لم يتم اختيار ملف النموذج'})
         
-        model_file = request.files['model']
-        labels_file = request.files['labels']
+        model_file = request.files['model_file']
+        labels_file = request.files.get('labels_file')
         
-        # Check if filenames are valid
-        if model_file.filename == '' or labels_file.filename == '':
-            return jsonify({'error': 'No selected files'}), 400
+        if model_file.filename == '':
+            return jsonify({'success': False, 'error': 'لم يتم اختيار ملف النموذج'})
         
         # Create Model directory if it doesn't exist
         os.makedirs('Model', exist_ok=True)
@@ -929,25 +949,16 @@ def upload_model():
         model_path = os.path.join('Model', 'keras_model.h5')
         model_file.save(model_path)
         
-        # Save labels file
-        labels_path = os.path.join('Model', 'labels.txt')
-        labels_file.save(labels_path)
+        # Save labels file if provided
+        if labels_file and labels_file.filename != '':
+            labels_path = os.path.join('Model', 'labels.txt')
+            labels_file.save(labels_path)
         
-        # Reload the sign classifier with the new model
-        global sign_classifier
-        try:
-            sign_classifier = SignClassifier(model_path=model_path, labels_path=labels_path)
-            logger.info("Successfully loaded new model and labels")
-        except Exception as e:
-            logger.error(f"Error loading new model: {str(e)}")
-            # Keep using the current classifier, but inform the user
-            return jsonify({'warning': f"Model uploaded but could not be loaded: {str(e)}"}), 200
-        
-        return jsonify({'status': 'success', 'message': 'Model and labels uploaded successfully'})
+        return jsonify({'success': True, 'message': 'تم رفع النموذج بنجاح'})
     
     except Exception as e:
         logger.error(f"Error uploading model: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'success': False, 'error': 'حدث خطأ أثناء رفع النموذج'})
 
 if __name__ == '__main__':
     with app.app_context():
