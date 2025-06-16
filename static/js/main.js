@@ -37,6 +37,17 @@ function initializeApp() {
     // Initialize performance monitoring
     initializePerformanceMonitoring();
     
+    // Start camera and gesture recognition automatically
+    if (window.cameraManager && typeof window.cameraManager.startCamera === 'function') {
+        window.cameraManager.startCamera().then(() => {
+            if (window.gestureRecognition && typeof window.gestureRecognition.start === 'function') {
+                window.gestureRecognition.start();
+            }
+        }).catch(error => {
+            console.error('Failed to start camera automatically:', error);
+        });
+    }
+    
     console.log('Application initialized successfully');
 }
 

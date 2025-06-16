@@ -32,10 +32,19 @@
                 </div>
                 <div class="card-body text-center">
                     <div id="videoContainer" class="video-container">
-                        <img id="videoFeed" src="" alt="إدخال الفيديو" class="img-fluid rounded" style="display: none; max-height: 400px;">
+                        <video id="videoFeed" class="img-fluid rounded" style="display: none; max-height: 400px;"></video>
                         <div id="videoPlaceholder" class="placeholder-content">
                             <i class="fas fa-camera fa-5x mb-3 text-muted"></i>
                             <p class="text-muted">اضغط على "تشغيل الكاميرا" لبدء الترجمة</p>
+                        </div>
+                        <div id="cameraError" class="alert alert-danger mt-3" style="display: none;"></div>
+                    </div>
+
+                    
+                    <!-- Detected Letter Display -->
+                    <div id="detectedLetter" class="letter-display" style="display: none;">
+                        <div class="alert alert-success text-center">
+                            <h2 class="display-3 mb-0" id="letterText"></h2>
                         </div>
                     </div>
                     
@@ -187,6 +196,35 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize camera with error handling
+        try {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error('متصفحك لا يدعم الوصول للكاميرا');
+            }
+            
+            // Initialize camera manager
+            window.cameraManager = new CameraManager();
+            
+            // Set up error handler
+            window.cameraManager.onError = function(error, message) {
+                const errorElement = document.getElementById('cameraError');
+                if (errorElement) {
+                    errorElement.textContent = message;
+                    errorElement.style.display = 'block';
+                }
+            };
+            
+        } catch (error) {
+            const errorElement = document.getElementById('cameraError');
+            if (errorElement) {
+                errorElement.textContent = error.message;
+                errorElement.style.display = 'block';
+            }
+        }
+    });
+</script>
 <script src="{{ url_for('static', filename='js/camera.js') }}"></script>
 <script src="{{ url_for('static', filename='js/gesture_recognition.js') }}"></script>
 {% endblock %}

@@ -427,8 +427,13 @@ class GestureRecognition {
         // Add sign to recognized signs
         this.recognizedSigns.push(sign);
         
-        // Update current sentence
-        this.updateCurrentSentence();
+        // Update current sentence by appending the recognized sign
+        this.currentSentence = this.processArabicText(this.recognizedSigns);
+        
+        // Show detected letter notification
+        if (window.ArabicSignLanguage && window.ArabicSignLanguage.showNotification) {
+            window.ArabicSignLanguage.showNotification(`تم التعرف على الحرف: ${sign}`, 'success');
+        }
         
         // Update UI
         this.updateRecognizedSignsDisplay();
@@ -638,6 +643,7 @@ class GestureRecognition {
         const predictionElement = document.getElementById('currentPrediction');
         const confidenceElement = document.getElementById('confidenceLevel');
         const predictionDisplay = document.getElementById('predictionDisplay');
+        const letterDisplay = document.getElementById('detectedLetter');
         
         if (prediction) {
             if (predictionElement) {
@@ -662,6 +668,11 @@ class GestureRecognition {
             if (predictionDisplay) {
                 predictionDisplay.style.display = 'block';
             }
+            
+            if (letterDisplay) {
+                letterDisplay.textContent = prediction.sign;
+                letterDisplay.style.display = 'block';
+            }
         } else {
             if (predictionElement) {
                 predictionElement.textContent = '-';
@@ -674,6 +685,10 @@ class GestureRecognition {
             
             if (predictionDisplay) {
                 predictionDisplay.style.display = 'none';
+            }
+            
+            if (letterDisplay) {
+                letterDisplay.style.display = 'none';
             }
         }
     }

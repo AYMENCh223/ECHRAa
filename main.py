@@ -58,25 +58,20 @@ translations_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'da
 with open(translations_path, 'r', encoding='utf-8') as f:
     translations = json.load(f)
 
-# Initialize modules with simplified approach
-class SimpleHandDetector:
-    def __init__(self, max_hands=1):
-        self.max_hands = max_hands
-    
-    def find_hands(self, img, draw=True):
-        return img
-    
-    def find_position(self, img, hand_no=0, draw=True):
-        return []
+from utils.hand_detector import HandDetector
 
-hand_detector = SimpleHandDetector(max_hands=1)
+hand_detector = HandDetector(max_hands=1)
 
 # Initialize sign classifier with lazy loading to avoid threading issues
+import tensorflow as tf
+from tensorflow.keras.models import load_model
+
 class LazySignClassifier:
     def __init__(self):
         self._classifier = None
         self._labels = None
         self._load_labels()
+        self._load_model()
     
     def _load_labels(self):
         try:
@@ -88,15 +83,43 @@ class LazySignClassifier:
         if not self._labels:
             self._labels = ["أ", "ب", "ت", "ث", "ج", "ح", "خ", "د", "ذ", "ر", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ك", "ل", "م", "ن", "ه", "و", "ي"]
     
+    def _load_model(self):
+        try:
+            self._classifier = load_model("Model/keras_model.h5")
+            logger.info("Model loaded successfully")
+        except Exception as e:
+            logger.error(f"Failed to load model: {str(e)}")
+            self._classifier = None
+    
     def get_prediction(self, img, draw=True):
-        # For demonstration purposes, cycle through Arabic letters
-        # In production, this would use actual computer vision model
-        import time
-        current_time = int(time.time())
-        letter_index = current_time % len(self._labels)
-        probabilities = [0.0] * len(self._labels)
-        probabilities[letter_index] = 0.90
-        return probabilities, letter_index
+        if self._classifier is None:
+            # Fallback to cycling letters if model not loaded
+            import time
+            current_time = int(time.time())
+            letter_index = current_time % len(self._labels)
+            probabilities = [0.0] * len(self._labels)
+            probabilities[letter_index] = 0.90
+            return probabilities, letter_index
+        
+        # Preprocess image for model input
+        try:
+            img_resized = cv2.resize(img, (224, 224))  # Assuming model input size 224x224
+            img_normalized = img_resized / 255.0
+            img_expanded = np.expand_dims(img_normalized, axis=0)
+            
+            predictions = self._classifier.predict(img_expanded)
+            probabilities = predictions[0]
+            letter_index = np.argmax(probabilities)
+            return probabilities, letter_index
+        except Exception as e:
+            logger.error(f"Error during prediction: {str(e)}")
+            # Fallback to cycling letters
+            import time
+            current_time = int(time.time())
+            letter_index = current_time % len(self._labels)
+            probabilities = [0.0] * len(self._labels)
+            probabilities[letter_index] = 0.90
+            return probabilities, letter_index
 
 sign_classifier = LazySignClassifier()
 model_loaded = True
@@ -424,7 +447,10 @@ def process_frame():
             img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
         
         # Find hands in the frame
-        hands, img = hand_detector.find_hands(img, draw=True)  # Always draw landmarks for better visualization
+        img_with_hands = hand_detector.find_hands(img, draw=True)  # Draw landmarks for visualization
+        
+        # Extract hand landmarks positions
+        landmarks = hand_detector.find_position(img_with_hands, hand_no=0, draw=False)
         
         result = {
             'text': '',
@@ -432,186 +458,60 @@ def process_frame():
             'hand_detected': False
         }
         
-        if hands and time.time() - last_prediction_time > prediction_cooldown:
+        if landmarks and time.time() - last_prediction_time > prediction_cooldown:
             result['hand_detected'] = True
-            hand = hands[0]
-            x, y, w, h = hand['bbox']
-            landmarks = hand['landmarks']
             
-            # Check if this is a valid hand with enough visible landmarks
-            if len(landmarks) >= 15:  # At least 15 landmarks should be visible
-                # Process the hand region
-                offset = 30  # Increased offset for better hand coverage
-                imgSize = 300
-                imgWhite = np.ones((imgSize, imgSize, 3), np.uint8) * 255
-                
-                # Crop hand region with offset
-                imgCrop = img[max(0, y-offset):min(img.shape[0], y+h+offset), 
-                            max(0, x-offset):min(img.shape[1], x+w+offset)]
-                
-                if imgCrop.size == 0 or imgCrop.shape[0] <= 10 or imgCrop.shape[1] <= 10:
-                    # The hand is mostly outside the frame or too small
-                    logger.debug("Hand region too small or out of frame")
-                    processing_frame = False
-                    return jsonify({'error': 'Hand region too small or out of frame', 'hand_detected': True})
-                
-                # Resize and center crop on white background
-                aspectRatio = h / w
-                
-                if aspectRatio > 1:
-                    k = imgSize / h
-                    wCal = int(k * w)
-                    imgResize = cv2.resize(imgCrop, (wCal, imgSize))
-                    wGap = int((imgSize - wCal) / 2)
-                    imgWhite[:, wGap:wCal+wGap] = imgResize
-                else:
-                    k = imgSize / w
-                    hCal = int(k * h)
-                    imgResize = cv2.resize(imgCrop, (imgSize, hCal))
-                    hGap = int((imgSize - hCal) / 2)
-                    imgWhite[hGap:hCal+hGap, :] = imgResize
-                
-                # Draw landmarks on white image for better reference
-                # Adjust landmark positions to the white canvas
-                for idx, (lm_x, lm_y) in enumerate(landmarks):
-                    try:
-                        # Normalize coordinates to the crop region
-                        # Make sure lm_x and lm_y are within the bounds of the original image
-                        if lm_x < x or lm_x > x + w or lm_y < y or lm_y > y + h:
-                            # Skip out-of-bounds landmarks
-                            continue
-                            
-                        norm_x = (lm_x - x + offset) / (w + 2*offset)
-                        norm_y = (lm_y - y + offset) / (h + 2*offset)
-                        
-                        # Clamp values to ensure they're in [0, 1] range
-                        norm_x = max(0, min(1, norm_x))
-                        norm_y = max(0, min(1, norm_y))
-                        
-                        # Apply to the white image dimensions
-                        if aspectRatio > 1:
-                            new_x = int(wGap + norm_x * wCal)
-                            new_y = int(norm_y * imgSize)
-                        else:
-                            new_x = int(norm_x * imgSize)
-                            new_y = int(hGap + norm_y * hCal)
-                        
-                        # Make sure the new coordinates are within the white image
-                        if 0 <= new_x < imgSize and 0 <= new_y < imgSize:
-                            # Use different colors for different landmark groups
-                            if idx in [0, 1, 2, 3, 4]:  # Thumb
-                                color = (255, 0, 0)  # Blue
-                            elif idx in [5, 6, 7, 8]:    # Index finger
-                                color = (0, 255, 0)  # Green
-                            elif idx in [9, 10, 11, 12]:  # Middle finger
-                                color = (0, 255, 255)  # Yellow
-                            elif idx in [13, 14, 15, 16]:  # Ring finger
-                                color = (0, 0, 255)  # Red
-                            elif idx in [17, 18, 19, 20]:  # Pinky
-                                color = (255, 0, 255)  # Magenta
-                            else:  # Palm landmarks
-                                color = (255, 255, 0)  # Cyan
-                                
-                            # Draw landmark on white image
-                            radius = 4 if idx == 0 else 3  # Make base of palm slightly bigger
-                            cv2.circle(imgWhite, (new_x, new_y), radius, color, cv2.FILLED)
-                            
-                            # Connect landmarks to show hand structure
-                            # Connect fingers
-                            if idx > 0 and idx % 4 != 0:
-                                # Get previous landmark in same finger
-                                prev_idx = idx - 1
-                                prev_lm = landmarks[prev_idx]
-                                
-                                # Convert previous landmark
-                                prev_norm_x = max(0, min(1, (prev_lm[0] - x + offset) / (w + 2*offset)))
-                                prev_norm_y = max(0, min(1, (prev_lm[1] - y + offset) / (h + 2*offset)))
-                                
-                                if aspectRatio > 1:
-                                    prev_new_x = int(wGap + prev_norm_x * wCal)
-                                    prev_new_y = int(prev_norm_y * imgSize)
-                                else:
-                                    prev_new_x = int(prev_norm_x * imgSize)
-                                    prev_new_y = int(hGap + prev_norm_y * hCal)
-                                
-                                # Draw line connecting landmarks
-                                if 0 <= prev_new_x < imgSize and 0 <= prev_new_y < imgSize:
-                                    cv2.line(imgWhite, (prev_new_x, prev_new_y), (new_x, new_y), color, 2)
-                    except Exception as e:
-                        # Log and continue if there's an error with one landmark
-                        logger.error(f"Error drawing landmark {idx}: {str(e)}")
-                        continue
-                        
-                # Add a light grid for better reference
-                grid_spacing = imgSize // 8
-                grid_color = (220, 220, 220)  # Light gray
-                
-                for i in range(1, 8):
-                    # Horizontal lines
-                    y_pos = i * grid_spacing
-                    cv2.line(imgWhite, (0, y_pos), (imgSize, y_pos), grid_color, 1)
-                    # Vertical lines
-                    x_pos = i * grid_spacing
-                    cv2.line(imgWhite, (x_pos, 0), (x_pos, imgSize), grid_color, 1)
-                
-                # Get prediction
-                prediction, index = sign_classifier.get_prediction(imgWhite)
+            # Preprocess the hand image for prediction
+            # Crop hand region based on landmarks bounding box
+            x_coords = [lm[1] for lm in landmarks]
+            y_coords = [lm[2] for lm in landmarks]
+            x_min, x_max = min(x_coords), max(x_coords)
+            y_min, y_max = min(y_coords), max(y_coords)
             
-            # Now handle the prediction if it exists
-            if 'prediction' in locals() and 'index' in locals() and prediction is not None and index is not None and index >= 0:
-                try:
-                    # Get the label
-                    with open("Model/labels.txt", "r") as file:
-                        labels = [line.strip() for line in file.readlines()]
-                    
-                    if 0 <= index < len(labels):
-                        predicted_label = labels[index]
-                        
-                        # Update last prediction time
-                        last_prediction_time = time.time()
-                        
-                        recognized_signs.append(predicted_label)
-                        if len(recognized_signs) > 10:  # Keep only the last 10 signs
-                            recognized_signs = recognized_signs[-10:]
-                        
-                        # Return the predicted label and confidence
-                        result['text'] = predicted_label
-                        result['confidence'] = float(max(prediction))
-                        
-                        # Reshape Arabic text
-                        result['reshaped_text'] = reshape_arabic_text(predicted_label)
-                        
-                        # Log successful recognition
-                        logger.info(f"Recognized sign: {predicted_label} with confidence {float(max(prediction)):.2f}")
-                    else:
-                        # Invalid index
-                        logger.warning(f"Invalid label index: {index}, labels length: {len(labels)}")
-                        result['text'] = ""
-                        result['confidence'] = 0.0
-                        result['reshaped_text'] = ""
-                except Exception as e:
-                    logger.error(f"Error loading or processing labels: {str(e)}")
-                    # Try to use a default label for testing
-                    try:
-                        if 0 <= index < len(arabic_letters):
-                            predicted_label = arabic_letters[index]
-                            result['text'] = predicted_label
-                            result['confidence'] = float(max(prediction))
-                            result['reshaped_text'] = reshape_arabic_text(predicted_label)
-                        else:
-                            result['text'] = ""
-                            result['confidence'] = 0.0
-                            result['reshaped_text'] = ""
-                    except:
-                        result['text'] = ""
-                        result['confidence'] = 0.0
-                        result['reshaped_text'] = ""
+            offset = 20
+            x_min = max(0, x_min - offset)
+            y_min = max(0, y_min - offset)
+            x_max = min(img.shape[1], x_max + offset)
+            y_max = min(img.shape[0], y_max + offset)
+            
+            img_crop = img[y_min:y_max, x_min:x_max]
+            
+            if img_crop.size == 0 or img_crop.shape[0] <= 10 or img_crop.shape[1] <= 10:
+                logger.debug("Hand region too small or out of frame")
+                processing_frame = False
+                return jsonify({'error': 'Hand region too small or out of frame', 'hand_detected': True})
+            
+            # Resize and normalize for model input
+            img_resized = cv2.resize(img_crop, (224, 224))
+            img_normalized = img_resized / 255.0
+            img_expanded = np.expand_dims(img_normalized, axis=0)
+            
+            # Get prediction from classifier
+            probabilities, index = sign_classifier.get_prediction(img_crop)
+            
+            if index is not None and 0 <= index < len(sign_classifier._labels):
+                predicted_label = sign_classifier._labels[index]
+                
+                # Update last prediction time
+                last_prediction_time = time.time()
+                
+                recognized_signs.append(predicted_label)
+                if len(recognized_signs) > 10:
+                    recognized_signs = recognized_signs[-10:]
+                
+                result['text'] = predicted_label
+                result['confidence'] = float(max(probabilities))
+                result['reshaped_text'] = reshape_arabic_text(predicted_label)
+                
+                logger.info(f"Recognized sign: {predicted_label} with confidence {float(max(probabilities)):.2f}")
             else:
-                # No valid prediction
-                logger.debug("No confident prediction detected in this frame")
                 result['text'] = ""
                 result['confidence'] = 0.0
                 result['reshaped_text'] = ""
+        else:
+            result['text'] = ""
+            result['confidence'] = 0.0
+            result['reshaped_text'] = ""
         
         processing_frame = False
         return jsonify(result)

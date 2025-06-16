@@ -47,6 +47,16 @@ class CameraManager {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 throw new Error('متصفحك لا يدعم الوصول للكاميرا');
             }
+
+            // Verify video element exists
+            this.video = document.getElementById('videoFeed');
+            if (!this.video) {
+                throw new Error('عنصر الفيديو غير موجود في الصفحة');
+            }
+
+            // Configure video element
+            this.video.playsInline = true;
+            this.video.muted = true;
             
             await this.enumerateDevices();
             this.setupEventListeners();
@@ -162,16 +172,21 @@ class CameraManager {
      */
     async startCamera(videoElement = null) {
         try {
-            if (videoElement) {
-                this.video = videoElement;
-            } else {
-                this.video = document.getElementById('videoFeed') || 
-                           document.getElementById('collectionVideo') ||
-                           document.querySelector('video');
-            }
-            
+            // Use existing video element if already set
             if (!this.video) {
-                throw new Error('لم يتم العثور على عنصر الفيديو');
+                if (videoElement) {
+                    this.video = videoElement;
+                } else {
+                    this.video = document.getElementById('videoFeed');
+                }
+                
+                if (!this.video) {
+                    throw new Error('لم يتم العثور على عنصر الفيديو');
+                }
+
+                // Ensure video element is properly configured
+                this.video.playsInline = true;
+                this.video.muted = true;
             }
             
             // Update constraints with current device
@@ -540,6 +555,8 @@ class CameraManager {
             userMessage = 'إعدادات الكاميرا غير مدعومة';
         } else if (error.name === 'SecurityError') {
             userMessage = 'يجب استخدام HTTPS للوصول للكاميرا';
+        } else if (error.message.includes('عنصر الفيديو')) {
+            userMessage = 'خطأ في إعدادات الفيديو: ' + error.message;
         }
         
         // Show user notification

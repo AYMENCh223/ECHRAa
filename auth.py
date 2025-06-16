@@ -25,14 +25,14 @@ def login():
             }
             response = requests.post(f"{SUPABASE_AUTH_URL}/token?grant_type=password", json=data, headers=headers)
             if response.status_code == 200:
-                session['user'] = response.json().get('access_token')
+                session['user_id'] = response.json().get('access_token')
                 flash('تم تسجيل الدخول بنجاح.', 'success')
                 return redirect(url_for('index'))
             else:
                 flash('فشل تسجيل الدخول. يرجى التحقق من بياناتك.', 'error')
         else:
             # Mock login: accept any email/password for development
-            session['user'] = email
+            session['user_id'] = email
             flash('تم تسجيل الدخول التجريبي بنجاح.', 'success')
             return redirect(url_for('index'))
     return render_template('login.html')
